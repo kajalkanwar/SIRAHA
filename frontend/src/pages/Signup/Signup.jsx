@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signupUser } from "../../constants/api";
 
 import {
   FiUser,
@@ -18,6 +19,9 @@ function Signup() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,18 +39,45 @@ function Signup() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
+  setError("");
+  setSuccess("");
 
-    console.log("Signup data:", formData);
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
 
-    // Backend signup will be connected here later.
-  };
+  try {
+    setLoading(true);
+
+    const data = await signupUser({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+
+    setSuccess(data.message);
+
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+
+    // Move to login page after successful signup
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#F8F4EC] text-[#1F2937]">
@@ -206,10 +237,22 @@ function Signup() {
 
                   {/* ================= FORM ================= */}
 
-                  <form
-                    onSubmit={handleSubmit}
-                    className="space-y-6"
-                  >
+                  {error && (
+  <p className="mb-5 text-sm text-red-600">
+    {error}
+  </p>
+)}
+
+{success && (
+  <p className="mb-5 text-sm text-[#0E5B3B]">
+    {success}
+  </p>
+)}
+
+<form
+  onSubmit={handleSubmit}
+  className="space-y-6"
+>
 
                     {/* NAME */}
 
@@ -492,7 +535,7 @@ function Signup() {
                         transition-colors
                       "
                     >
-                      CREATE ACCOUNT
+                     {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
                     </button>
 
                   </form>

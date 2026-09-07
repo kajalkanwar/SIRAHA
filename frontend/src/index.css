@@ -5,39 +5,47 @@
   --secondary: #F8F4EC;
   --gold: #C9A24A;
   --text: #1F2937;
+
+  /* Global layout spacing */
+  --page-padding: 1.25rem;
+  --content-max-width: 1400px;
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
+html {
   width: 100%;
   min-height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-html {
   overflow-x: hidden;
 }
 
 body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+
   font-family: "Poppins", sans-serif;
   background: var(--secondary);
   color: var(--text);
+
   overflow-x: hidden;
 }
 
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Images */
 img {
   max-width: 100%;
   display: block;
 }
 
+/* Headings */
 h1,
 h2,
 h3,
@@ -48,20 +56,67 @@ h6 {
   margin: 0;
 }
 
+/* Paragraphs */
 p {
   margin: 0;
 }
 
+/* Links */
 a {
   text-decoration: none;
   color: inherit;
 }
 
+/* Form elements */
 button,
-input {
+input,
+textarea,
+select {
   font-family: inherit;
 }
 
 button {
   cursor: pointer;
+}
+
+/* ========================================
+   GLOBAL PAGE CONTAINER
+   ======================================== */
+
+.site-container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding-inline: var(--page-padding);
+}
+
+/* ========================================
+   GLOBAL PAGE SECTION
+   ======================================== */
+
+.page-section {
+  width: 100%;
+  padding-block: 4rem;
+}
+
+/* ========================================
+   RESPONSIVE SPACING
+   ======================================== */
+
+@media (min-width: 640px) {
+  :root {
+    --page-padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-padding: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --page-padding: 4rem;
+  }
 }

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   FiUser,
   FiPackage,
@@ -8,6 +9,16 @@ import {
 } from "react-icons/fi";
 
 function Profile() {
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  };
   return (
     <div className="min-h-screen bg-[#F8F4EC] text-[#1F2937]">
 
@@ -57,12 +68,12 @@ function Profile() {
               <div className="text-center mt-5">
 
                 <h2 className="font-serif text-2xl text-[#0E5B3B]">
-                  Your Name
-                </h2>
+  {user?.name || "Your Name"}
+</h2>
 
-                <p className="text-sm text-[#64748B] mt-1">
-                  your@email.com
-                </p>
+<p className="text-sm text-[#64748B] mt-1">
+  {user?.email || "your@email.com"}
+</p>
 
               </div>
 
@@ -231,6 +242,7 @@ function Profile() {
 
               <button
                 type="button"
+                onClick={() => navigate("/account-details")}
                 className="
                   w-full
                   flex
@@ -273,6 +285,8 @@ function Profile() {
 
               <button
                 type="button"
+                onClick={handleLogout}
+                
                 className="
                   w-full
                   flex

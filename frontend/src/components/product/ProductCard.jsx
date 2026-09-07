@@ -87,7 +87,7 @@ function ProductCard({ product }) {
           {product.category}
         </p>
 
-        <Link to={`/product/${product.id}`} className="block">
+        <Link to={`/product/${product._id}`} className="block">
           <h3 className="
             font-serif
             text-lg
