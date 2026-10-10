@@ -1,143 +1,214 @@
-// ========================================
-// BASE URL
-// ========================================
 
 export const BASE_URL = "http://localhost:5000/api";
 
-// ========================================
-// SIGNUP
-// ========================================
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
 
-export const signupUser = async (userData) => {
-  const response = await fetch(`${BASE_URL}/auth/signup`, {
-    method: "POST",
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const request = async (path, options = {}) => {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+      ...options.headers,
     },
-    body: JSON.stringify(userData),
   });
 
-  const data = await response.json();
+  const data =
+    response.status === 204 ? null : await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Signup failed");
+    throw new Error(data?.message || "Request failed.");
   }
 
   return data;
 };
 
-// ========================================
-// LOGIN
-// ========================================
+const jsonOptions = (method, body) => ({
+  method,
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body),
+});
 
-export const loginUser = async (userData) => {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
+// ============================================================
+// AUTH
+// ============================================================
 
-  const data = await response.json();
+export const signupUser = (userData) =>
+  request("/auth/signup", jsonOptions("POST", userData));
 
-  if (!response.ok) {
-    throw new Error(data.message || "Login failed");
-  }
+export const loginUser = (userData) =>
+  request("/auth/login", jsonOptions("POST", userData));
 
-  return data;
-};
+export const sendOtp = (payload) =>
+  request("/auth/send-otp", jsonOptions("POST", payload));
 
-// ========================================
-// GET ALL PRODUCTS
-// ========================================
+export const verifyOtp = (payload) =>
+  request("/auth/verify-otp", jsonOptions("POST", payload));
+
+// ============================================================
+// PRODUCTS
+// ============================================================
 
 export const getProducts = async () => {
-  const response = await fetch(`${BASE_URL}/products`);
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch products");
-  }
-
-  return data.products;
+  const data = await request("/products");
+  return Array.isArray(data) ? data : data?.products || [];
 };
-
-// ========================================
-// GET SINGLE PRODUCT
-// ========================================
 
 export const getProductById = async (id) => {
-  const response = await fetch(`${BASE_URL}/products/${id}`);
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch product");
-  }
-
-  return data.product;
+  const data = await request(`/products/${id}`);
+  return data?.product ?? data;
 };
 
-// ========================================
-// CREATE PRODUCT
-// ========================================
+export const uploadProductImages = async (files) => {
+  const fileArray = Array.from(files || []);
+
+  if (!fileArray.length) {
+    throw new Error("Please select at least one image.");
+  }
+
+  const formData = new FormData();
+  fileArray.forEach((file) => formData.append("images", file));
+
+  const data = await request("/products/upload-images", {
+    method: "POST",
+    body: formData,
+  });
+
+  return data?.images || [];
+};
 
 export const createProduct = async (productData) => {
-  const response = await fetch(`${BASE_URL}/products`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(productData),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to create product");
-  }
-
-  return data.product;
+  const data = await request(
+    "/products",
+    jsonOptions("POST", productData)
+  );
+  return data?.product ?? data;
 };
-
-// ========================================
-// UPDATE PRODUCT
-// ========================================
 
 export const updateProduct = async (id, productData) => {
-  const response = await fetch(`${BASE_URL}/products/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(productData),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to update product");
-  }
-
-  return data.product;
+  const data = await request(
+    `/products/${id}`,
+    jsonOptions("PUT", productData)
+  );
+  return data?.product ?? data;
 };
 
-// ========================================
-// DELETE PRODUCT
-// ========================================
+export const deleteProduct = (id) =>
+  request(`/products/${id}`, { method: "DELETE" });
 
-export const deleteProduct = async (id) => {
-  const response = await fetch(`${BASE_URL}/products/${id}`, {
-    method: "DELETE",
-  });
+// ============================================================
+// CATEGORIES
+// ============================================================
 
-  const data = await response.json();
+export const getCategories = async (includeInactive = false) => {
+  const query = includeInactive ? "?all=true" : "";
+  const data = await request(`/categories${query}`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to delete product");
-  }
-
-  return data;
+  return Array.isArray(data) ? data : data?.categories || [];
 };
+
+export const createCategory = async (categoryData) => {
+  const data = await request(
+    "/categories",
+    jsonOptions("POST", categoryData)
+  );
+  return data?.category ?? data;
+};
+
+export const updateCategory = async (id, categoryData) => {
+  const data = await request(
+    `/categories/${id}`,
+    jsonOptions("PUT", categoryData)
+  );
+  return data?.category ?? data;
+};
+
+export const deleteCategory = (id) =>
+  request(`/categories/${id}`, { method: "DELETE" });
+
+// ============================================================
+// INVENTORY
+// ============================================================
+
+export const getInventory = async () => {
+  const data = await request("/inventory");
+  return Array.isArray(data) ? data : data?.products || [];
+};
+
+export const updateProductInventory = async (
+  productId,
+  sizeInventory
+) =>
+  request(
+    `/inventory/${productId}`,
+    jsonOptions("PUT", { sizeInventory })
+  );
+
+// ============================================================
+// ORDERS
+// ============================================================
+
+export const createOrder = (orderData) =>
+  request("/orders", jsonOptions("POST", orderData));
+
+export const getAdminOrders = async () => {
+  const data = await request("/orders");
+  return Array.isArray(data) ? data : data?.orders || [];
+};
+
+export const getOrders = getAdminOrders;
+
+export const getOrderById = async (id) => {
+  const data = await request(`/orders/${id}`);
+  return data?.order ?? data;
+};
+
+export const updateOrderStatus = (id, orderStatus) =>
+  request(
+    `/orders/${id}/status`,
+    jsonOptions("PUT", { orderStatus })
+  );
+
+// ============================================================
+// ANNOUNCEMENTS
+// ============================================================
+
+export const getAnnouncements = async () => {
+  const data = await request("/announcements");
+  return data?.announcements || data || [];
+};
+
+export const createAnnouncement = async (announcementData) => {
+  const data = await request(
+    "/announcements",
+    jsonOptions("POST", announcementData)
+  );
+  return data?.announcement ?? data;
+};
+
+export const updateAnnouncement = async (id, announcementData) => {
+  const data = await request(
+    `/announcements/${id}`,
+    jsonOptions("PUT", announcementData)
+  );
+  return data?.announcement ?? data;
+};
+
+export const deleteAnnouncement = (id) =>
+  request(`/announcements/${id}`, { method: "DELETE" });
+
+// ============================================================
+// RAZORPAY
+// ============================================================
+
+export const createRazorpayOrder = (amount) =>
+  request(
+    "/payments/create-order",
+    jsonOptions("POST", { amount })
+  );
+
+export const verifyRazorpayPayment = (paymentData) =>
+  request("/payments/verify", jsonOptions("POST", paymentData));

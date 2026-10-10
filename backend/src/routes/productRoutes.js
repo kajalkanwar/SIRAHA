@@ -6,23 +6,66 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  uploadProductImages,
 } from "../controllers/productController.js";
+
+import upload from "../middleware/upload.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Create product
-router.post("/", createProduct);
+/*
+|--------------------------------------------------------------------------
+| PRODUCT IMAGE UPLOAD
+|--------------------------------------------------------------------------
+*/
 
-// Get all products
+router.post(
+  "/upload-images",
+  protect,
+  adminOnly,
+  upload.array("images", 8),
+  uploadProductImages
+);
+
+/*
+|--------------------------------------------------------------------------
+| CREATE PRODUCT
+|--------------------------------------------------------------------------
+*/
+
+router.post("/", protect, adminOnly, createProduct);
+
+/*
+|--------------------------------------------------------------------------
+| GET ALL PRODUCTS
+|--------------------------------------------------------------------------
+*/
+
 router.get("/", getProducts);
 
-// Get one product
+/*
+|--------------------------------------------------------------------------
+| GET SINGLE PRODUCT
+|--------------------------------------------------------------------------
+*/
+
 router.get("/:id", getProductById);
 
-// Update product
-router.put("/:id", updateProduct);
+/*
+|--------------------------------------------------------------------------
+| UPDATE PRODUCT
+|--------------------------------------------------------------------------
+*/
 
-// Delete product
-router.delete("/:id", deleteProduct);
+router.put("/:id", protect, adminOnly, updateProduct);
+
+/*
+|--------------------------------------------------------------------------
+| DELETE PRODUCT
+|--------------------------------------------------------------------------
+*/
+
+router.delete("/:id", protect, adminOnly, deleteProduct);
 
 export default router;

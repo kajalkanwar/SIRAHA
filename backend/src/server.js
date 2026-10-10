@@ -1,29 +1,52 @@
+import "dotenv/config";
+
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
 
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
-
-dotenv.config();
+import orderRoutes from "./routes/orderRoutes.js";
+import addressRoutes from "./routes/addressRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import inventoryRoutes from "./routes/inventoryRoutes.js";
 
 const app = express();
 
-// Middleware
+// ========================================
+// MIDDLEWARE
+// ========================================
+
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// ========================================
+// ROUTES
+// ========================================
+
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/addresses", addressRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
-// Test route
+// ========================================
+// TEST ROUTE
+// ========================================
+
 app.get("/", (req, res) => {
   res.send("Sirraha backend is running");
 });
 
-// Start server
+// ========================================
+// START SERVER
+// ========================================
+
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
@@ -37,6 +60,7 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error("Database connection failed:", error);
+    process.exit(1);
   }
 };
 

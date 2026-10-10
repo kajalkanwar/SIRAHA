@@ -1,15 +1,68 @@
 @import "tailwindcss";
 
-:root {
-  --primary: #0E5B3B;
-  --secondary: #F8F4EC;
-  --gold: #C9A24A;
-  --text: #1F2937;
+/* ========================================
+   SIRRAHA GLOBAL THEME
+   Warm Brown + Cream + Antique Gold
+   ======================================== */
 
-  /* Global layout spacing */
+:root {
+  /* ========================================
+     BRAND COLORS
+     ======================================== */
+
+  --primary: #5A3026;
+  --primary-dark: #43231C;
+  --primary-light: #795033;
+
+  /* ========================================
+     BACKGROUNDS
+     ======================================== */
+
+  --secondary: #FAF7F0;
+  --cream: #F2EBDD;
+  --warm-white: #FFFDF9;
+
+  /* ========================================
+     ANTIQUE GOLD
+     ======================================== */
+
+  --gold: #C8A15A;
+  --gold-light: #D8BD83;
+  --gold-dark: #A98243;
+
+  /* ========================================
+     TEXT
+     ======================================== */
+
+  --text: #3A2A20;
+  --text-secondary: #71655B;
+  --text-muted: #918477;
+
+  /* ========================================
+     BORDERS
+     ======================================== */
+
+  --border: #DED4C4;
+  --border-light: #EAE2D5;
+
+  /* ========================================
+     GLOBAL LAYOUT
+     ======================================== */
+
   --page-padding: 1.25rem;
   --content-max-width: 1400px;
+  --sirraha-header-height: 183px;
 }
+
+@media (max-width: 767px) {
+  :root {
+    --sirraha-header-height: 102px;
+  }
+}
+
+/* ========================================
+   GLOBAL RESET
+   ======================================== */
 
 * {
   box-sizing: border-box;
@@ -28,6 +81,7 @@ body {
   padding: 0;
 
   font-family: "Poppins", sans-serif;
+
   background: var(--secondary);
   color: var(--text);
 
@@ -39,13 +93,21 @@ body {
   min-height: 100vh;
 }
 
-/* Images */
+
+/* ========================================
+   IMAGES
+   ======================================== */
+
 img {
   max-width: 100%;
   display: block;
 }
 
-/* Headings */
+
+/* ========================================
+   HEADINGS
+   ======================================== */
+
 h1,
 h2,
 h3,
@@ -56,18 +118,30 @@ h6 {
   margin: 0;
 }
 
-/* Paragraphs */
+
+/* ========================================
+   PARAGRAPHS
+   ======================================== */
+
 p {
   margin: 0;
 }
 
-/* Links */
+
+/* ========================================
+   LINKS
+   ======================================== */
+
 a {
   text-decoration: none;
   color: inherit;
 }
 
-/* Form elements */
+
+/* ========================================
+   FORM ELEMENTS
+   ======================================== */
+
 button,
 input,
 textarea,
@@ -78,6 +152,7 @@ select {
 button {
   cursor: pointer;
 }
+
 
 /* ========================================
    GLOBAL PAGE CONTAINER
@@ -90,6 +165,7 @@ button {
   padding-inline: var(--page-padding);
 }
 
+
 /* ========================================
    GLOBAL PAGE SECTION
    ======================================== */
@@ -98,6 +174,166 @@ button {
   width: 100%;
   padding-block: 4rem;
 }
+
+
+/* ========================================
+   SIRRAHA LOGO
+   ======================================== */
+
+.sirraha-logo {
+  font-family: "Cormorant Garamond", Georgia, serif;
+
+  font-size: 30px;
+  font-weight: 500;
+
+  line-height: 1;
+  letter-spacing: 0.3em;
+
+  color: var(--primary);
+
+  white-space: nowrap;
+  text-decoration: none;
+
+  background: transparent;
+  border: none;
+
+  padding: 0;
+  margin: 0;
+
+  cursor: pointer;
+}
+
+
+/* ========================================
+   ANNOUNCEMENT BAR
+   ======================================== */
+
+.announcement-bar {
+  width: 100%;
+  height: 39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--primary);
+  color: var(--secondary);
+
+  overflow: hidden;
+  position: relative;
+
+  z-index: 500;
+
+  font-family: "Poppins", sans-serif;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  letter-spacing: 0.22em;
+  line-height: 1;
+
+  text-align: center;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+.announcement-inner {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.announcement-text {
+  display: inline-block;
+
+  padding-inline: 20px;
+
+  animation:
+    announcementFadeIn
+    0.7s
+    ease both;
+}
+
+
+/* ========================================
+   ANNOUNCEMENT ANIMATION
+   ======================================== */
+
+@keyframes announcementFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ========================================
+   GOLD ACCENTS
+   ======================================== */
+
+.gold-accent {
+  color: var(--gold);
+}
+
+.gold-border {
+  border-color: var(--gold);
+}
+
+
+/* ========================================
+   PRIMARY BROWN BUTTON
+   ======================================== */
+
+.sirraha-button {
+  background: var(--primary);
+  color: var(--secondary);
+
+  border: 1px solid var(--primary);
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.sirraha-button:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+
+/* ========================================
+   ANTIQUE GOLD BUTTON
+   ======================================== */
+
+.sirraha-gold-button {
+  background: var(--gold);
+  color: #3A2A20;
+
+  border: 1px solid var(--gold);
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.sirraha-gold-button:hover {
+  background: var(--gold-dark);
+  border-color: var(--gold-dark);
+}
+
 
 /* ========================================
    RESPONSIVE SPACING
@@ -119,4 +355,73 @@ button {
   :root {
     --page-padding: 4rem;
   }
+}
+
+
+/* ========================================
+   MOBILE ANNOUNCEMENT BAR
+   ======================================== */
+
+@media (max-width: 640px) {
+  .announcement-bar {
+    height: 34px;
+
+    padding: 0 12px;
+
+    font-size: 8px;
+    letter-spacing: 0.13em;
+  }
+
+  .announcement-text {
+    padding-inline: 8px;
+    text-align: center;
+  }
+}
+@keyframes heroContentIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* =========================================================
+   SIRRAHA SEARCH ANIMATIONS
+========================================================= */
+
+@keyframes sirrahaSearchOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sirrahaSearchResults {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.admin-sidebar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-sidebar-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }

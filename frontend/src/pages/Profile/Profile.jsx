@@ -1,17 +1,20 @@
 import { useNavigate } from "react-router-dom";
+
 import {
   FiUser,
   FiPackage,
-  FiHeart,
   FiMapPin,
   FiLogOut,
   FiChevronRight,
+  FiHelpCircle,
 } from "react-icons/fi";
 
 function Profile() {
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -19,311 +22,588 @@ function Profile() {
 
     navigate("/login");
   };
+
+  const accountOptions = [
+    {
+      label: "My Orders",
+      description:
+        "Track your orders and view order history.",
+      icon: FiPackage,
+      path: "/track-order",
+    },
+    {
+      label: "Saved Addresses",
+      description:
+        "Manage your delivery addresses.",
+      icon: FiMapPin,
+      path: "/saved-addresses",
+    },
+    {
+      label: "Account Details",
+      description:
+        "Update your personal information.",
+      icon: FiUser,
+      path: "/account-details",
+    },
+    {
+      label: "Help & Support",
+      description:
+        "Get assistance with your Sirraha experience.",
+      icon: FiHelpCircle,
+      path: "/track-order",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F8F4EC] text-[#1F2937]">
+    <div className="min-h-screen w-full bg-[#FAF7F0] text-[#3A2A20]">
 
-      {/* ================= PROFILE HEADER ================= */}
+      {/* =====================================================
+          PROFILE HEADER
+      ===================================================== */}
 
-      <section className="border-b border-[#E5E0D6]">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
-
-          <p className="text-[#0E5B3B] text-[11px] tracking-[0.35em] uppercase mb-3">
-            SIRRAHA ACCOUNT
+      <section className="border-b border-[#DED4C4] bg-[#FAF7F0]">
+        <div
+          className="
+            mx-auto
+            w-full
+            max-w-6xl
+            px-5
+            py-10
+            sm:px-8
+            sm:py-14
+            lg:px-12
+          "
+        >
+          <p
+            className="
+              mb-3
+              text-[9px]
+              font-medium
+              uppercase
+              tracking-[0.3em]
+              text-[#A98243]
+              sm:text-[10px]
+            "
+          >
+            Sirraha Account
           </p>
 
-          <h1 className="font-serif text-4xl sm:text-5xl text-[#0E5B3B]">
-            My Profile
+          <h1
+            className="
+              font-['Cormorant_Garamond']
+              text-4xl
+              font-normal
+              leading-none
+              text-[#43231C]
+              sm:text-5xl
+            "
+          >
+            My Account
           </h1>
 
-          <p className="mt-3 text-[#64748B] text-sm sm:text-base">
-            Manage your account, orders and preferences.
+          <p
+            className="
+              mt-3
+              max-w-xl
+              font-['Poppins']
+              text-[10px]
+              leading-6
+              text-[#71655B]
+              sm:text-[11px]
+            "
+          >
+            Manage your account, orders and saved
+            addresses in one place.
           </p>
-
         </div>
       </section>
 
+      {/* =====================================================
+          PROFILE CONTENT
+      ===================================================== */}
 
-      {/* ================= PROFILE CONTENT ================= */}
+      <main
+        className="
+          mx-auto
+          w-full
+          max-w-6xl
+          px-5
+          py-8
+          sm:px-8
+          sm:py-12
+          lg:px-12
+          lg:py-14
+        "
+      >
+        <div
+          className="
+            grid
+            grid-cols-1
+            gap-6
+            lg:grid-cols-3
+            lg:gap-8
+          "
+        >
 
-      <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14">
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-
-          {/* ================= LEFT PROFILE CARD ================= */}
+          {/* =================================================
+              LEFT PROFILE CARD
+          ================================================= */}
 
           <div className="lg:col-span-1">
-
-            <div className="bg-white/40 border border-[#E5E0D6] p-7 sm:p-8">
+            <div
+              className="
+                rounded-xl
+                border
+                border-[#DED4C4]
+                bg-[#FFFDF9]
+                p-6
+                shadow-[0_8px_30px_rgba(67,35,28,0.035)]
+                sm:p-8
+              "
+            >
 
               {/* PROFILE ICON */}
 
-              <div className="flex items-center justify-center w-20 h-20 rounded-full bg-[#EFE9DE] mx-auto">
-                <FiUser className="w-9 h-9 text-[#0E5B3B]" />
+              <div
+                className="
+                  mx-auto
+                  flex
+                  h-20
+                  w-20
+                  items-center
+                  justify-center
+                  rounded-full
+                  border
+                  border-[#D8BD83]
+                  bg-[#F2EBDD]
+                "
+              >
+                <FiUser
+                  className="
+                    h-9
+                    w-9
+                    text-[#5A3026]
+                  "
+                  strokeWidth={1.25}
+                />
               </div>
-
 
               {/* NAME */}
 
-              <div className="text-center mt-5">
+              <div className="mt-5 text-center">
+                <h2
+                  className="
+                    font-['Cormorant_Garamond']
+                    text-2xl
+                    font-normal
+                    leading-none
+                    text-[#43231C]
+                  "
+                >
+                  {user?.name || "Your Name"}
+                </h2>
 
-                <h2 className="font-serif text-2xl text-[#0E5B3B]">
-  {user?.name || "Your Name"}
-</h2>
-
-<p className="text-sm text-[#64748B] mt-1">
-  {user?.email || "your@email.com"}
-</p>
-
+                <p
+                  className="
+                    mt-2
+                    break-all
+                    font-['Poppins']
+                    text-[9px]
+                    text-[#918477]
+                  "
+                >
+                  {user?.email || "your@email.com"}
+                </p>
               </div>
-
 
               {/* EDIT PROFILE */}
 
               <button
                 type="button"
+                onClick={() =>
+                  navigate("/account-details")
+                }
                 className="
-                  w-full
                   mt-7
+                  flex
+                  h-12
+                  w-full
+                  items-center
+                  justify-center
+                  rounded-full
                   border
-                  border-[#0E5B3B]
-                  py-3
-                  text-[#0E5B3B]
-                  text-sm
-                  tracking-[0.15em]
+                  border-[#5A3026]
+                  bg-transparent
+                  px-5
+                  font-['Poppins']
+                  text-[8px]
+                  font-medium
                   uppercase
-                  hover:bg-[#0E5B3B]
-                  hover:text-white
-                  transition
+                  tracking-[2px]
+                  text-[#5A3026]
+                  transition-all
+                  duration-300
+                  hover:bg-[#5A3026]
+                  hover:text-[#FFFDF9]
                 "
               >
                 Edit Profile
               </button>
-
             </div>
 
+            {/* DESKTOP SMALL ACCOUNT NOTE */}
+
+            <div
+              className="
+                mt-5
+                hidden
+                border-t
+                border-[#DED4C4]
+                pt-5
+                lg:block
+              "
+            >
+              <p
+                className="
+                  font-['Cormorant_Garamond']
+                  text-[15px]
+                  italic
+                  leading-6
+                  text-[#918477]
+                "
+              >
+                Rooted in Indian craft.
+              </p>
+            </div>
           </div>
 
-
-          {/* ================= RIGHT OPTIONS ================= */}
+          {/* =================================================
+              RIGHT ACCOUNT OPTIONS
+          ================================================= */}
 
           <div className="lg:col-span-2">
 
-            <div className="border border-[#E5E0D6] bg-white/30">
+            <div
+              className="
+                overflow-hidden
+                rounded-xl
+                border
+                border-[#DED4C4]
+                bg-[#FFFDF9]
+                shadow-[0_8px_30px_rgba(67,35,28,0.035)]
+              "
+            >
 
+              {/* ACCOUNT OPTIONS */}
 
-              {/* ORDERS */}
+              {accountOptions.map(
+                (option, index) => {
+                  const Icon = option.icon;
 
-              <button
-                type="button"
-                className="
-                  w-full
-                  flex
-                  items-center
-                  justify-between
-                  p-6
-                  sm:p-7
-                  border-b
-                  border-[#E5E0D6]
-                  hover:bg-[#F1ECE3]
-                  transition
-                  text-left
-                "
-              >
+                  return (
+                    <button
+                      key={option.label}
+                      type="button"
+                      onClick={() =>
+                        navigate(option.path)
+                      }
+                      className={`
+                        group
+                        flex
+                        w-full
+                        items-center
+                        justify-between
+                        gap-4
+                        p-5
+                        text-left
+                        transition-all
+                        duration-300
+                        hover:bg-[#F2EBDD]/65
+                        sm:p-6
+                        ${
+                          index !==
+                          accountOptions.length - 1
+                            ? "border-b border-[#EAE2D5]"
+                            : ""
+                        }
+                      `}
+                    >
 
-                <div className="flex items-center gap-5">
+                      {/* LEFT SIDE */}
 
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#EFE9DE]">
-                    <FiPackage className="w-5 h-5 text-[#0E5B3B]" />
-                  </div>
+                      <div
+                        className="
+                          flex
+                          min-w-0
+                          items-center
+                          gap-4
+                          sm:gap-5
+                        "
+                      >
 
-                  <div>
-                    <h3 className="text-base font-medium">
-                      My Orders
-                    </h3>
+                        {/* ICON */}
 
-                    <p className="text-sm text-[#64748B] mt-1">
-                      Track your orders and view order history.
-                    </p>
-                  </div>
+                        <div
+                          className="
+                            flex
+                            h-11
+                            w-11
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            border
+                            border-[#DED4C4]
+                            bg-[#F2EBDD]
+                            transition-all
+                            duration-300
+                            group-hover:border-[#C8A15A]
+                            group-hover:bg-[#FFFDF9]
+                            sm:h-12
+                            sm:w-12
+                          "
+                        >
+                          <Icon
+                            className="
+                              h-5
+                              w-5
+                              text-[#5A3026]
+                            "
+                            strokeWidth={1.3}
+                          />
+                        </div>
 
-                </div>
+                        {/* TEXT */}
 
-                <FiChevronRight className="w-5 h-5 text-[#64748B]" />
+                        <div className="min-w-0">
+                          <h3
+                            className="
+                              font-['Cormorant_Garamond']
+                              text-[20px]
+                              font-medium
+                              leading-none
+                              text-[#43231C]
+                              sm:text-[21px]
+                            "
+                          >
+                            {option.label}
+                          </h3>
 
-              </button>
+                          <p
+                            className="
+                              mt-1.5
+                              max-w-[430px]
+                              font-['Poppins']
+                              text-[9px]
+                              leading-5
+                              text-[#918477]
+                              sm:text-[10px]
+                            "
+                          >
+                            {option.description}
+                          </p>
+                        </div>
+                      </div>
 
+                      {/* ARROW */}
 
-              {/* WISHLIST */}
+                      <div
+                        className="
+                          flex
+                          h-8
+                          w-8
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-full
+                          border
+                          border-transparent
+                          transition-all
+                          duration-300
+                          group-hover:border-[#D8BD83]
+                          group-hover:bg-[#F2EBDD]
+                        "
+                      >
+                        <FiChevronRight
+                          className="
+                            h-4
+                            w-4
+                            text-[#A98243]
+                            transition-transform
+                            duration-300
+                            group-hover:translate-x-0.5
+                          "
+                          strokeWidth={1.25}
+                        />
+                      </div>
+                    </button>
+                  );
+                }
+              )}
 
-              <button
-                type="button"
-                className="
-                  w-full
-                  flex
-                  items-center
-                  justify-between
-                  p-6
-                  sm:p-7
-                  border-b
-                  border-[#E5E0D6]
-                  hover:bg-[#F1ECE3]
-                  transition
-                  text-left
-                "
-              >
-
-                <div className="flex items-center gap-5">
-
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#EFE9DE]">
-                    <FiHeart className="w-5 h-5 text-[#0E5B3B]" />
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-medium">
-                      Wishlist
-                    </h3>
-
-                    <p className="text-sm text-[#64748B] mt-1">
-                      View the styles you saved for later.
-                    </p>
-                  </div>
-
-                </div>
-
-                <FiChevronRight className="w-5 h-5 text-[#64748B]" />
-
-              </button>
-
-
-              {/* ADDRESSES */}
-
-              <button
-                type="button"
-                className="
-                  w-full
-                  flex
-                  items-center
-                  justify-between
-                  p-6
-                  sm:p-7
-                  border-b
-                  border-[#E5E0D6]
-                  hover:bg-[#F1ECE3]
-                  transition
-                  text-left
-                "
-              >
-
-                <div className="flex items-center gap-5">
-
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#EFE9DE]">
-                    <FiMapPin className="w-5 h-5 text-[#0E5B3B]" />
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-medium">
-                      Saved Addresses
-                    </h3>
-
-                    <p className="text-sm text-[#64748B] mt-1">
-                      Manage your delivery addresses.
-                    </p>
-                  </div>
-
-                </div>
-
-                <FiChevronRight className="w-5 h-5 text-[#64748B]" />
-
-              </button>
-
-
-              {/* ACCOUNT SETTINGS */}
-
-              <button
-                type="button"
-                onClick={() => navigate("/account-details")}
-                className="
-                  w-full
-                  flex
-                  items-center
-                  justify-between
-                  p-6
-                  sm:p-7
-                  border-b
-                  border-[#E5E0D6]
-                  hover:bg-[#F1ECE3]
-                  transition
-                  text-left
-                "
-              >
-
-                <div className="flex items-center gap-5">
-
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#EFE9DE]">
-                    <FiUser className="w-5 h-5 text-[#0E5B3B]" />
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-medium">
-                      Account Details
-                    </h3>
-
-                    <p className="text-sm text-[#64748B] mt-1">
-                      Update your personal information.
-                    </p>
-                  </div>
-
-                </div>
-
-                <FiChevronRight className="w-5 h-5 text-[#64748B]" />
-
-              </button>
-
-
-              {/* LOGOUT */}
+              {/* =================================================
+                  LOGOUT
+              ================================================= */}
 
               <button
                 type="button"
                 onClick={handleLogout}
-                
                 className="
-                  w-full
+                  group
                   flex
+                  w-full
                   items-center
-                  gap-5
-                  p-6
-                  sm:p-7
+                  justify-between
+                  gap-4
+                  border-t
+                  border-[#DED4C4]
+                  p-5
                   text-left
-                  hover:bg-[#F1ECE3]
-                  transition
+                  transition-all
+                  duration-300
+                  hover:bg-[#F2EBDD]/65
+                  sm:p-6
                 "
               >
 
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#EFE9DE]">
-                  <FiLogOut className="w-5 h-5 text-[#0E5B3B]" />
+                <div
+                  className="
+                    flex
+                    min-w-0
+                    items-center
+                    gap-4
+                    sm:gap-5
+                  "
+                >
+
+                  {/* LOGOUT ICON */}
+
+                  <div
+                    className="
+                      flex
+                      h-11
+                      w-11
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-full
+                      border
+                      border-[#DED4C4]
+                      bg-[#F2EBDD]
+                      transition-all
+                      duration-300
+                      group-hover:border-[#C8A15A]
+                      group-hover:bg-[#FFFDF9]
+                      sm:h-12
+                      sm:w-12
+                    "
+                  >
+                    <FiLogOut
+                      className="
+                        h-5
+                        w-5
+                        text-[#5A3026]
+                      "
+                      strokeWidth={1.3}
+                    />
+                  </div>
+
+                  {/* LOGOUT TEXT */}
+
+                  <div>
+                    <h3
+                      className="
+                        font-['Cormorant_Garamond']
+                        text-[20px]
+                        font-medium
+                        leading-none
+                        text-[#43231C]
+                        sm:text-[21px]
+                      "
+                    >
+                      Logout
+                    </h3>
+
+                    <p
+                      className="
+                        mt-1.5
+                        font-['Poppins']
+                        text-[9px]
+                        leading-5
+                        text-[#918477]
+                        sm:text-[10px]
+                      "
+                    >
+                      Sign out of your Sirraha account.
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-base font-medium">
-                    Logout
-                  </h3>
+                {/* LOGOUT ARROW */}
 
-                  <p className="text-sm text-[#64748B] mt-1">
-                    Sign out of your Sirraha account.
-                  </p>
+                <div
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-full
+                    border
+                    border-transparent
+                    transition-all
+                    duration-300
+                    group-hover:border-[#D8BD83]
+                    group-hover:bg-[#F2EBDD]
+                  "
+                >
+                  <FiChevronRight
+                    className="
+                      h-4
+                      w-4
+                      text-[#A98243]
+                      transition-transform
+                      duration-300
+                      group-hover:translate-x-0.5
+                    "
+                    strokeWidth={1.25}
+                  />
                 </div>
-
               </button>
-
             </div>
 
+            {/* =================================================
+                MOBILE ROOTED LINE
+            ================================================= */}
+
+            <div
+              className="
+                mt-7
+                flex
+                items-center
+                gap-3
+                lg:hidden
+              "
+            >
+              <span className="h-px flex-1 bg-[#DED4C4]" />
+
+              <p
+                className="
+                  font-['Cormorant_Garamond']
+                  text-[13px]
+                  italic
+                  text-[#918477]
+                "
+              >
+                Rooted in Indian craft.
+              </p>
+
+              <span className="h-px flex-1 bg-[#DED4C4]" />
+            </div>
           </div>
-
         </div>
-
       </main>
-
     </div>
   );
 }

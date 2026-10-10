@@ -1,16 +1,20 @@
 import express from "express";
 
 import {
-  signupUser,
-  loginUser,
+  sendOtp,
+  verifyOtp,
 } from "../controllers/authController.js";
 
 const router = express.Router();
 
-// Signup API
-router.post("/signup", signupUser);
+// ==========================================
+// PASSWORDLESS CUSTOMER AUTHENTICATION
+// ==========================================
 
-// Login API
-router.post("/login", loginUser);
+// Send OTP to email or mobile
+router.post("/send-otp", sendOtp);
+
+// Verify OTP and login
+router.post("/verify-otp", verifyOtp);
 
 export default router;

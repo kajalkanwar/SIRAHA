@@ -1,38 +1,58 @@
+import shortKurti from "../assets/images/shortkurti.jpg";
+import longKurti from "../assets/images/longkurti.jpg";
+import coordSet from "../assets/images/coordset.jpg";
+import tops from "../assets/images/tops.jpg";
+import palazzos from "../assets/images/palazzos.jpg";
+import farshiSalwarSuit from "../assets/images/farshisalwarsuit.jpg";
+
 export const categories = [
   {
     id: 1,
-    name: "Short Kurtis",
-    image: "/src/assets/images/shortkurti.jpg",
+    name: "SHORT KURTIS",
+    slug: "short-kurtis",
     path: "/category/short-kurtis",
+    image: shortKurti,
   },
+
   {
     id: 2,
-    name: "Long Kurtis",
-    image: "/src/assets/images/longkurti.jpg",
+    name: "LONG KURTIS",
+    slug: "long-kurtis",
     path: "/category/long-kurtis",
+    image: longKurti,
   },
+
   {
     id: 3,
-    name: "Co-ord Sets",
-    image: "/src/assets/images/coordset.jpg",
+    name: "CO-ORD SETS",
+    slug: "co-ord-sets",
     path: "/category/co-ord-sets",
+    image: coordSet,
   },
+
   {
     id: 4,
-    name: "Three Piece Suit",
-    image: "/src/assets/images/threepiecesuit.jpg",
-    path: "/category/three-piece-suit",
+    name: "TOPS",
+    slug: "tops",
+    path: "/category/tops",
+    image: tops,
   },
+
   {
     id: 5,
-    name: "Trousers",
-    image: "/src/assets/images/trousers.jpg",
-    path: "/category/trousers",
+    name: "PALAZZOS",
+    slug: "palazzos",
+    path: "/category/palazzos",
+    image: palazzos,
   },
+
   {
     id: 6,
-    name: "Farshi Salwar Suit",
-    image: "/src/assets/images/farshisalwarsuit.jpg",
+    name: "FARSHI SALWAR SUIT",
+    slug: "farshi-salwar-suit",
     path: "/category/farshi-salwar-suit",
+    image: farshiSalwarSuit,
   },
 ];
+
+export default categories;
