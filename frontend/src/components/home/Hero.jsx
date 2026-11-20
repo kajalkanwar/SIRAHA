@@ -170,7 +170,7 @@ function Hero() {
         relative
         w-full
         overflow-hidden
-        bg-[#3A2A20]
+        bg-[#351C19]
 
         h-[476px]
 
@@ -400,7 +400,7 @@ function Hero() {
 
                       tracking-[-0.7px]
 
-                      text-[#FFFDF9]
+                      text-[#FFFFFF]
 
                       ${
                         slide.id === 1
@@ -489,7 +489,7 @@ function Hero() {
 
                       leading-[1.7]
 
-                      text-[#FFFDF9]/90
+                      text-[#FFFFFF]/90
 
                       sm:mt-5
                       sm:text-[10px]
@@ -554,7 +554,7 @@ function Hero() {
 
                         tracking-[2.5px]
 
-                        text-[#3A2A20]
+                        text-[#351C19]
 
                         shadow-[0_12px_35px_rgba(36,23,17,0.25)]
 
@@ -608,7 +608,7 @@ function Hero() {
                           rounded-full
 
                           border
-                          border-[#3A2A20]/20
+                          border-[#351C19]/20
                         "
                       >
                         <FiChevronRight
@@ -660,11 +660,11 @@ function Hero() {
           rounded-full
 
           border
-          border-[#FFFDF9]/35
+          border-[#FFFFFF]/35
 
-          bg-[#FFFDF9]/10
+          bg-[#FFFFFF]/10
 
-          text-[#FFFDF9]
+          text-[#FFFFFF]
 
           backdrop-blur-md
 
@@ -673,7 +673,7 @@ function Hero() {
 
           hover:border-[#D8BD83]
 
-          hover:bg-[#5A3026]/65
+          hover:bg-[#4B1F1B]/65
 
           lg:flex
 
@@ -715,11 +715,11 @@ function Hero() {
           rounded-full
 
           border
-          border-[#FFFDF9]/35
+          border-[#FFFFFF]/35
 
-          bg-[#FFFDF9]/10
+          bg-[#FFFFFF]/10
 
-          text-[#FFFDF9]
+          text-[#FFFFFF]
 
           backdrop-blur-md
 
@@ -728,7 +728,7 @@ function Hero() {
 
           hover:border-[#D8BD83]
 
-          hover:bg-[#5A3026]/65
+          hover:bg-[#4B1F1B]/65
 
           lg:flex
 
@@ -784,7 +784,7 @@ function Hero() {
               ${
                 index === activeSlide
                   ? "w-8 bg-[#D8BD83]"
-                  : "w-4 bg-[#FFFDF9]/70"
+                  : "w-4 bg-[#FFFFFF]/70"
               }
             `}
           />

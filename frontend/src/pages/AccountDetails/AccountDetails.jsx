@@ -41,7 +41,7 @@ function AccountDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F4EC] text-[#1F2937]">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#1F2937]">
 
       {/* HEADER */}
 

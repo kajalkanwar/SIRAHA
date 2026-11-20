@@ -1,6 +1,6 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FiArrowRight } from "react-icons/fi";
 
 function ProductCard({ product, badgeType = "new" }) {
   const location = useLocation();
@@ -8,26 +8,46 @@ function ProductCard({ product, badgeType = "new" }) {
   const intervalRef = useRef(null);
 
   const productId = product?._id || product?.id;
-  const productName = product?.name || product?.description || "Sirraha Product";
+
+  const productName =
+    product?.name || product?.description || "Sirraha Product";
+
   const productCategory = product?.category || "Collection";
-  const productImages = Array.isArray(product?.images) && product.images.length > 0
-    ? product.images.filter(Boolean)
-    : product?.image ? [product.image] : [];
+
+  const productImages =
+    Array.isArray(product?.images) && product.images.length > 0
+      ? product.images.filter(Boolean)
+      : product?.image
+        ? [product.image]
+        : [];
 
   const originalPrice = Number(product?.price || 0);
-  const salePrice = product?.salePrice !== null && product?.salePrice !== undefined
-    ? Number(product.salePrice) : null;
-  const hasSale = Boolean(product?.isOnSale) && salePrice !== null && salePrice > 0 && salePrice < originalPrice;
+
+  const salePrice =
+    product?.salePrice !== null && product?.salePrice !== undefined
+      ? Number(product.salePrice)
+      : null;
+
+  const hasSale =
+    Boolean(product?.isOnSale) &&
+    salePrice !== null &&
+    salePrice > 0 &&
+    salePrice < originalPrice;
+
   const finalPrice = hasSale ? salePrice : originalPrice;
-  const discountPercentage = hasSale && originalPrice > 0
-    ? Math.round(((originalPrice - salePrice) / originalPrice) * 100) : 0;
+
+  const discountPercentage =
+    hasSale && originalPrice > 0
+      ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+      : 0;
 
   const badgeText = badgeType === "best" ? "BEST SELLER" : "NEW IN";
+
   const productLink = `/product/${productId}`;
 
   const startImageSlider = () => {
-    if (productImages.length <= 1) return;
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (productImages.length <= 1 || intervalRef.current) return;
+
     intervalRef.current = setInterval(() => {
       setImageIndex((previousIndex) => (previousIndex + 1) % productImages.length);
     }, 1200);
@@ -38,78 +58,215 @@ function ProductCard({ product, badgeType = "new" }) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+
     setImageIndex(0);
   };
 
-  useEffect(() => () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, []);
 
-  const currentImage = productImages[imageIndex] || productImages[0] || null;
+  const currentImage =
+    productImages[imageIndex] || productImages[0] || null;
 
   return (
-    <article className="group w-full min-w-0">
-      <div
-        className="relative w-full overflow-hidden border border-[#DED4C4] bg-[#F2EBDD] transition-all duration-300 ease-out group-hover:border-[#C8A15A]/60"
-        onMouseEnter={startImageSlider}
-        onMouseLeave={stopImageSlider}
-        onTouchStart={startImageSlider}
-        onTouchEnd={stopImageSlider}
-        onTouchCancel={stopImageSlider}
+    <article
+      className="group w-full min-w-0"
+      onMouseEnter={startImageSlider}
+      onMouseLeave={stopImageSlider}
+      onTouchStart={startImageSlider}
+      onTouchEnd={stopImageSlider}
+      onTouchCancel={stopImageSlider}
+    >
+      {/* ENTIRE PRODUCT CARD IS CLICKABLE */}
+      <Link
+        to={productLink}
+        state={{ backgroundLocation: location }}
+        aria-label={`View ${productName} details`}
+        className="
+          relative
+          isolate
+          block
+          aspect-[3/4.2]
+          w-full
+          overflow-hidden
+          rounded-[10px]
+          bg-[#EDE8DF]
+          shadow-none
+          transition-shadow
+          duration-500
+          hover:shadow-[0_10px_28px_rgba(53,20,17,0.12)]
+          focus-visible:outline
+          focus-visible:outline-2
+          focus-visible:outline-offset-2
+          focus-visible:outline-[#C8A15A]
+          sm:rounded-[12px]
+        "
       >
-        <Link
-          to={productLink}
-          state={{ backgroundLocation: location }}
-          className="block aspect-[4/5] w-full overflow-hidden"
-          aria-label={`View ${productName}`}
-        >
-          {currentImage ? (
-            <img src={currentImage} alt={productName} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]" />
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center bg-[#F2EBDD] text-center">
-              <span className="font-['Cormorant_Garamond'] text-[22px] tracking-[3px] text-[#5A3026]">SIRRAHA</span>
-              <span className="mt-1 font-['Poppins'] text-[7px] uppercase tracking-[2px] text-[#918477]">Image Coming Soon</span>
-            </div>
-          )}
-        </Link>
+        {/* PRODUCT IMAGE */}
+        {currentImage ? (
+          <img
+            src={currentImage}
+            alt={productName}
+            loading="lazy"
+            className="
+              absolute
+              inset-0
+              h-full
+              w-full
+              object-cover
+              object-center
+              transition-transform
+              duration-700
+              ease-out
+              group-hover:scale-[1.025]
+            "
+          />
+        ) : (
+          <div className="absolute inset-0 flex h-full w-full flex-col items-center justify-center bg-[#F5F0E8] text-center">
+            <span className="font-['Cormorant_Garamond'] text-2xl tracking-[3px] text-[#4B1F1B]">
+              SIRRAHA
+            </span>
 
-        <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 rounded-full border border-[#FFFDF9]/65 bg-white/[0.08] px-2.5 py-1.5 shadow-[0_2px_12px_rgba(67,35,28,0.08)] backdrop-blur-md sm:left-3 sm:top-3 sm:px-3">
-          <span className="font-['Poppins'] text-[6px] font-medium uppercase tracking-[1.8px] text-[#FFFDF9] drop-shadow-[0_1px_2px_rgba(67,35,28,0.35)] sm:text-[7px]">{badgeText}</span>
-        </div>
-
-        {hasSale && discountPercentage > 0 && (
-          <div className="pointer-events-none absolute right-2.5 top-2.5 z-10 flex h-[40px] w-[40px] flex-col items-center justify-center rounded-full border border-[#FFFDF9]/20 bg-[#5A3026]/90 text-[#FFFDF9] shadow-[0_3px_12px_rgba(67,35,28,0.12)] sm:right-3 sm:top-3 sm:h-[46px] sm:w-[46px]">
-            <span className="font-['Cormorant_Garamond'] text-[14px] font-semibold leading-none sm:text-[15px]">{discountPercentage}%</span>
-            <span className="mt-0.5 font-['Poppins'] text-[5px] uppercase tracking-[1.4px] text-[#F2EBDD]">OFF</span>
+            <span className="mt-1 font-['Poppins'] text-[8px] uppercase tracking-[2px] text-[#918477]">
+              Image Coming Soon
+            </span>
           </div>
         )}
 
-        <Link
-          to={productLink}
-          state={{ backgroundLocation: location }}
-          className="absolute bottom-2 left-2 right-2 z-20 flex h-[38px] translate-y-2 items-center justify-center gap-2 border border-[#5A3026] bg-[#5A3026] px-3 font-['Poppins'] text-[7px] font-medium uppercase tracking-[2px] !text-[#FFFDF9] opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 hover:border-[#43231C] hover:bg-[#43231C] hover:!text-[#FFFDF9] sm:bottom-3 sm:left-3 sm:right-3 sm:h-[40px] sm:text-[8px]"
+        {/* SOFT IMAGE GRADIENT */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[48%] bg-gradient-to-t from-[#24130F]/85 via-[#24130F]/35 to-transparent" />
+
+        {/* NEW IN / BEST SELLER FROSTED BADGE */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            left-2
+            top-2
+            z-10
+            inline-flex
+            items-center
+            rounded-full
+            border
+            border-white/45
+            bg-[#F7F4EE]/65
+            px-2
+            py-[4px]
+            shadow-sm
+            backdrop-blur-md
+            sm:left-2.5
+            sm:top-2.5
+            sm:px-2.5
+            sm:py-1
+          "
         >
-          <FiArrowRight size={13} strokeWidth={1.5} />
-          <span>View Details</span>
-        </Link>
-      </div>
+          <span
+            className="
+              whitespace-nowrap
+              font-['Poppins']
+              text-[7px]
+              font-medium
+              uppercase
+              leading-none
+              tracking-[0.45px]
+              text-[#4B1F1B]
+              sm:text-[8px]
+              sm:tracking-[0.6px]
+            "
+          >
+            {badgeText}
+          </span>
+        </div>
 
-      <div className="w-full border-x border-b border-[#DED4C4] bg-[#FFFDF9] px-3 py-3 transition-colors duration-300 group-hover:border-[#C8A15A]/60 sm:px-3.5 sm:py-3.5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-['Poppins'] text-[6px] font-medium uppercase tracking-[1.8px] text-[#A98243] sm:text-[7px]">{productCategory}</p>
-            <Link to={productLink} state={{ backgroundLocation: location }}>
-              <h3 className="mt-1 truncate font-['Cormorant_Garamond'] text-[17px] font-normal leading-tight text-[#43231C] transition-colors duration-300 hover:text-[#795033] sm:text-[18px]">{productName}</h3>
-            </Link>
+        {/* SMALL FROSTED DISCOUNT BADGE */}
+        {hasSale && discountPercentage > 0 && (
+          <div
+            className="
+              pointer-events-none
+              absolute
+              right-2
+              top-2
+              z-10
+              flex
+              h-[35px]
+              w-[35px]
+              flex-col
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-white/30
+              bg-[#4B1F1B]/55
+              text-white
+              shadow-sm
+              backdrop-blur-md
+              sm:right-2.5
+              sm:top-2.5
+              sm:h-[39px]
+              sm:w-[39px]
+            "
+          >
+            <span className="font-['Cormorant_Garamond'] text-[12px] font-semibold leading-none sm:text-[13px]">
+              {discountPercentage}%
+            </span>
+
+            <span className="mt-[2px] font-['Poppins'] text-[5px] font-medium uppercase leading-none tracking-[0.8px] text-white/90">
+              OFF
+            </span>
           </div>
+        )}
 
-          <div className="shrink-0 text-right">
-            {hasSale && <p className="whitespace-nowrap font-['Poppins'] text-[8px] font-medium text-[#7A5A4A] line-through decoration-[#5A3026] sm:text-[9px]">₹{originalPrice.toLocaleString("en-IN")}</p>}
-            <p className="mt-0.5 whitespace-nowrap font-['Cormorant_Garamond'] text-[16px] font-medium leading-none text-[#43231C] sm:text-[17px]">₹{finalPrice.toLocaleString("en-IN")}</p>
+        {/* PRODUCT NAME AND PRICES — CLICKABLE WITH THE CARD */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-x-0
+            bottom-0
+            z-[2]
+            flex
+            items-end
+            justify-between
+            gap-2
+            px-2.5
+            pb-2.5
+            pt-12
+            text-white
+            sm:px-3
+            sm:pb-3
+            sm:pt-14
+            md:px-3.5
+            md:pb-3.5
+          "
+        >
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-['Poppins'] text-[6px] font-medium uppercase tracking-[1.5px] text-white/75 sm:text-[7px] sm:tracking-[1.8px]">
+              {productCategory}
+            </p>
+
+            <h3 className="mt-1 line-clamp-2 font-['Cormorant_Garamond'] text-[16px] font-medium leading-[1.05] text-white sm:text-[19px] md:text-[21px]">
+              {productName}
+            </h3>
+
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 sm:mt-2 sm:gap-x-2.5">
+              <span className="whitespace-nowrap font-['Poppins'] text-[11px] font-semibold leading-none text-white sm:text-[13px] md:text-[14px]">
+                ₹{finalPrice.toLocaleString("en-IN")}
+              </span>
+
+              {hasSale && (
+                <span className="whitespace-nowrap font-['Poppins'] text-[8px] leading-none text-white/65 line-through decoration-white/60 sm:text-[9px] md:text-[10px]">
+                  ₹{originalPrice.toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        <div className="mt-3 h-px w-8 bg-[#C8A15A] transition-all duration-300 group-hover:w-12" />
-      </div>
+      </Link>
     </article>
   );
 }

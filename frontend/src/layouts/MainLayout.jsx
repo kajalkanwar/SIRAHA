@@ -42,104 +42,53 @@ function MainLayout() {
     []
   );
 
-  return (
-    <div className="min-h-screen w-full bg-[#FAF7F0]">
+return (
+  <div className="min-h-screen w-full bg-white">
+    {/* Fixed announcement bar and navbar */}
+    <header
+      className="
+        fixed
+        inset-x-0
+        top-0
+        z-[300]
+        w-full
+      "
+    >
+      <AnnouncementBar />
 
-      {/* =====================================================
-          FIXED GLOBAL HEADER
-          
-          Announcement + Navbar remain fixed while scrolling.
-          
-          WE ARE KEEPING YOUR EXISTING HEADER ARCHITECTURE.
-      ===================================================== */}
+      <Navbar
+        isSearchOpen={isSearchOpen}
+        onSearchOpen={openSearch}
+        onSearchClose={closeSearch}
+        onSearchCategory={openSearchWithQuery}
+      />
 
-      <header
-        className="
-          fixed
-          left-0
-          right-0
-          top-0
-          z-[300]
-          w-full
-        "
-      >
+      <Search
+        key={`${isSearchOpen}-${searchQuery}`}
+        isOpen={isSearchOpen}
+        onClose={closeSearch}
+        initialQuery={searchQuery}
+      />
+    </header>
 
-        {/* ===================================================
-            ANNOUNCEMENT BAR
-        =================================================== */}
+    {/* Keep page content below the fixed header */}
+    <main
+      className="
+        w-full
+        min-w-0
+        bg-white
+        pt-[92px]
+        sm:pt-[96px]
+        md:pt-[153px]
+        lg:pt-[153px]
+      "
+    >
+      <Outlet />
+    </main>
 
-        <AnnouncementBar />
-
-        {/* ===================================================
-            NAVBAR
-        =================================================== */}
-
-        <Navbar
-          isSearchOpen={isSearchOpen}
-          onSearchOpen={openSearch}
-          onSearchClose={closeSearch}
-          onSearchCategory={openSearchWithQuery}
-        />
-
-        {/* ===================================================
-            SEARCH PANEL
-
-            Search is INSIDE the fixed header.
-
-            This means it appears directly below Navbar
-            instead of sitting behind / underneath it.
-        =================================================== */}
-
-        <Search
-  key={`${isSearchOpen}-${searchQuery}`}
-  isOpen={isSearchOpen}
-  onClose={closeSearch}
-  initialQuery={searchQuery}
-/>
-
-      </header>
-
-      {/* =====================================================
-          PAGE CONTENT
-
-          Your existing header spacing is preserved.
-
-          Mobile:
-          Announcement ≈ 34px
-          Navbar ≈ 58px
-          Total ≈ 92px
-
-          Desktop:
-          Announcement ≈ 39px
-          Navbar ≈ 70px
-          Desktop navigation ≈ 44px
-          Total ≈ 153px
-      ===================================================== */}
-
-      <main
-        className="
-          w-full
-          min-w-0
-          pt-[92px]
-          sm:pt-[96px]
-          md:pt-[153px]
-          lg:pt-[153px]
-        "
-      >
-        <Outlet />
-      </main>
-
-      {/* =====================================================
-          CART DRAWER
-
-          Remains outside page content so it can appear above
-          the entire website.
-      ===================================================== */}
-
-      <CartDrawer />
-
-    </div>
-  );
+    <CartDrawer />
+  </div>
+);
 }
 
 export default MainLayout;

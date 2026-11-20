@@ -201,17 +201,17 @@ function InventoryManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] px-4 py-8 sm:px-7 lg:px-10">
+    <div className="min-h-screen bg-[#FFFFFF] px-4 py-8 sm:px-7 lg:px-10">
       <div className="mx-auto max-w-[1500px]">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#A98243]">
               Store Management
             </p>
-            <h1 className="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#43231C] sm:text-5xl">
+            <h1 className="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#351411] sm:text-5xl">
               Inventory
             </h1>
-            <p className="mt-2 text-sm text-[#71655B]">
+            <p className="mt-2 text-sm text-[#6B5651]">
               Update quantities for each size. Zero means unavailable.
             </p>
           </div>
@@ -219,14 +219,14 @@ function InventoryManagement() {
           <button
             type="button"
             onClick={loadInventory}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#DED4C4] bg-[#FFFDF9] px-4 py-3 text-xs text-[#5A3026] hover:bg-[#F2EBDD]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-4 py-3 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
           >
             <FiRefreshCw size={14} />
             Refresh
           </button>
         </div>
 
-        <div className="mb-5 rounded-xl border border-[#D8BD83] bg-[#F7F2E9] p-4 text-sm leading-6 text-[#5A3026]">
+        <div className="mb-5 rounded-xl border border-[#D8BD83] bg-[#F7F2E9] p-4 text-sm leading-6 text-[#4B1F1B]">
           <div className="flex gap-3">
             <FiAlertCircle className="mt-1 shrink-0" />
             <p>
@@ -239,7 +239,7 @@ function InventoryManagement() {
         </div>
 
         {message && (
-          <p role="status" className="mb-4 rounded-lg border border-[#D8BD83] bg-[#FFFDF9] p-3 text-sm text-[#5A3026]">
+          <p role="status" className="mb-4 rounded-lg border border-[#D8BD83] bg-[#FFFFFF] p-3 text-sm text-[#4B1F1B]">
             {message}
           </p>
         )}
@@ -250,27 +250,27 @@ function InventoryManagement() {
           </p>
         )}
 
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-[#DED4C4] bg-[#FFFDF9] px-4 py-3">
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-[#E5DDD8] bg-[#FFFFFF] px-4 py-3">
           <FiSearch size={17} className="text-[#A98243]" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search products or categories..."
-            className="w-full bg-transparent text-sm text-[#43231C] outline-none"
+            className="w-full bg-transparent text-sm text-[#351411] outline-none"
           />
         </div>
 
         {loading ? (
-          <div className="rounded-xl border border-[#EAE2D5] bg-[#FFFDF9] p-10 text-sm text-[#71655B]">
+          <div className="rounded-xl border border-[#F1ECE9] bg-[#FFFFFF] p-10 text-sm text-[#6B5651]">
             Loading inventory...
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="rounded-xl border border-[#EAE2D5] bg-[#FFFDF9] p-10 text-center">
+          <div className="rounded-xl border border-[#F1ECE9] bg-[#FFFFFF] p-10 text-center">
             <FiPackage className="mx-auto text-[#A98243]" size={25} />
-            <p className="mt-3 font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <p className="mt-3 font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               No products found
             </p>
-            <p className="mt-1 text-sm text-[#71655B]">
+            <p className="mt-1 text-sm text-[#6B5651]">
               Try another search or add products first.
             </p>
           </div>
@@ -293,11 +293,11 @@ function InventoryManagement() {
               return (
                 <section
                   key={product._id}
-                  className="overflow-hidden rounded-2xl border border-[#EAE2D5] bg-[#FFFDF9]"
+                  className="overflow-hidden rounded-2xl border border-[#F1ECE9] bg-[#FFFFFF]"
                 >
-                  <div className="flex flex-col gap-4 border-b border-[#EAE2D5] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <div className="flex flex-col gap-4 border-b border-[#F1ECE9] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <div className="flex items-center gap-4">
-                      <div className="h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-[#F2EBDD]">
+                      <div className="h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-[#FFFFFF]">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
@@ -312,13 +312,13 @@ function InventoryManagement() {
                       </div>
 
                       <div>
-                        <h2 className="text-sm font-medium text-[#43231C]">
+                        <h2 className="text-sm font-medium text-[#351411]">
                           {product.name}
                         </h2>
                         <p className="mt-1 text-xs text-[#918477]">
                           {product.category}
                         </p>
-                        <p className="mt-1 text-xs text-[#71655B]">
+                        <p className="mt-1 text-xs text-[#6B5651]">
                           Saved total stock: {product.stock ?? 0}
                         </p>
                       </div>
@@ -329,7 +329,7 @@ function InventoryManagement() {
                         <p className="text-[10px] uppercase tracking-[0.16em] text-[#918477]">
                           Draft total
                         </p>
-                        <p className="font-['Cormorant_Garamond'] text-3xl text-[#43231C]">
+                        <p className="font-['Cormorant_Garamond'] text-3xl text-[#351411]">
                           {total}
                         </p>
                       </div>
@@ -338,7 +338,7 @@ function InventoryManagement() {
                         type="button"
                         onClick={() => saveInventory(product)}
                         disabled={savingId === product._id}
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#5A3026] px-4 py-3 text-xs font-medium uppercase tracking-wider text-[#FFFDF9] hover:bg-[#43231C] disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#4B1F1B] px-4 py-3 text-xs font-medium uppercase tracking-wider text-[#FFFFFF] hover:bg-[#351411] disabled:opacity-50"
                       >
                         <FiSave size={14} />
                         {savingId === product._id ? "Saving..." : "Save"}
@@ -355,9 +355,9 @@ function InventoryManagement() {
                           return (
                             <label
                               key={size}
-                              className="rounded-xl border border-[#EAE2D5] bg-[#FCF9F3] p-3"
+                              className="rounded-xl border border-[#F1ECE9] bg-[#FCF9F3] p-3"
                             >
-                              <span className="flex items-center justify-between gap-2 text-xs font-medium text-[#43231C]">
+                              <span className="flex items-center justify-between gap-2 text-xs font-medium text-[#351411]">
                                 Size {size}
                                 <span className={`text-[10px] ${stock > 0 ? "text-[#6F806F]" : "text-[#8C4A3C]"}`}>
                                   {stock > 0 ? "Available" : "Unavailable"}
@@ -376,7 +376,7 @@ function InventoryManagement() {
                                     event.target.value
                                   )
                                 }
-                                className="mt-3 w-full rounded-lg border border-[#DED4C4] bg-[#FFFDF9] px-3 py-2 text-center text-sm text-[#43231C] outline-none focus:border-[#C8A15A]"
+                                className="mt-3 w-full rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-3 py-2 text-center text-sm text-[#351411] outline-none focus:border-[#C8A15A]"
                               />
 
                               <span className="mt-2 block text-[10px] text-[#918477]">
@@ -387,13 +387,13 @@ function InventoryManagement() {
                         })}
                       </div>
                     ) : (
-                      <p className="text-sm text-[#71655B]">
+                      <p className="text-sm text-[#6B5651]">
                         This product has no sizes yet. Add sizes in Product
                         Management before setting per-size stock.
                       </p>
                     )}
 
-                    <div className="mt-5 flex flex-col gap-3 border-t border-[#EAE2D5] pt-5 sm:flex-row">
+                    <div className="mt-5 flex flex-col gap-3 border-t border-[#F1ECE9] pt-5 sm:flex-row">
                       <input
                         value={newSizes[product._id] || ""}
                         onChange={(event) =>
@@ -403,13 +403,13 @@ function InventoryManagement() {
                           }))
                         }
                         placeholder="Add a size (e.g. XXL or Free Size)"
-                        className="min-w-0 flex-1 rounded-lg border border-[#DED4C4] bg-[#FFFDF9] px-3 py-3 text-sm outline-none focus:border-[#C8A15A]"
+                        className="min-w-0 flex-1 rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-3 py-3 text-sm outline-none focus:border-[#C8A15A]"
                       />
 
                       <button
                         type="button"
                         onClick={() => addSize(product)}
-                        className="rounded-lg border border-[#D8BD83] px-4 py-3 text-xs font-medium uppercase tracking-wider text-[#5A3026] hover:bg-[#F2EBDD]"
+                        className="rounded-lg border border-[#D8BD83] px-4 py-3 text-xs font-medium uppercase tracking-wider text-[#4B1F1B] hover:bg-[#FFFFFF]"
                       >
                         Add size
                       </button>

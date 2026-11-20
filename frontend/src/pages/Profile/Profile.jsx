@@ -55,13 +55,13 @@ function Profile() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#FAF7F0] text-[#3A2A20]">
+    <div className="min-h-screen w-full bg-[#FFFFFF] text-[#351C19]">
 
       {/* =====================================================
           PROFILE HEADER
       ===================================================== */}
 
-      <section className="border-b border-[#DED4C4] bg-[#FAF7F0]">
+      <section className="border-b border-[#E5DDD8] bg-[#FFFFFF]">
         <div
           className="
             mx-auto
@@ -94,7 +94,7 @@ function Profile() {
               text-4xl
               font-normal
               leading-none
-              text-[#43231C]
+              text-[#351411]
               sm:text-5xl
             "
           >
@@ -108,7 +108,7 @@ function Profile() {
               font-['Poppins']
               text-[10px]
               leading-6
-              text-[#71655B]
+              text-[#6B5651]
               sm:text-[11px]
             "
           >
@@ -154,8 +154,8 @@ function Profile() {
               className="
                 rounded-xl
                 border
-                border-[#DED4C4]
-                bg-[#FFFDF9]
+                border-[#E5DDD8]
+                bg-[#FFFFFF]
                 p-6
                 shadow-[0_8px_30px_rgba(67,35,28,0.035)]
                 sm:p-8
@@ -175,14 +175,14 @@ function Profile() {
                   rounded-full
                   border
                   border-[#D8BD83]
-                  bg-[#F2EBDD]
+                  bg-[#FFFFFF]
                 "
               >
                 <FiUser
                   className="
                     h-9
                     w-9
-                    text-[#5A3026]
+                    text-[#4B1F1B]
                   "
                   strokeWidth={1.25}
                 />
@@ -197,7 +197,7 @@ function Profile() {
                     text-2xl
                     font-normal
                     leading-none
-                    text-[#43231C]
+                    text-[#351411]
                   "
                 >
                   {user?.name || "Your Name"}
@@ -232,7 +232,7 @@ function Profile() {
                   justify-center
                   rounded-full
                   border
-                  border-[#5A3026]
+                  border-[#4B1F1B]
                   bg-transparent
                   px-5
                   font-['Poppins']
@@ -240,11 +240,11 @@ function Profile() {
                   font-medium
                   uppercase
                   tracking-[2px]
-                  text-[#5A3026]
+                  text-[#4B1F1B]
                   transition-all
                   duration-300
-                  hover:bg-[#5A3026]
-                  hover:text-[#FFFDF9]
+                  hover:bg-[#4B1F1B]
+                  hover:text-[#FFFFFF]
                 "
               >
                 Edit Profile
@@ -258,7 +258,7 @@ function Profile() {
                 mt-5
                 hidden
                 border-t
-                border-[#DED4C4]
+                border-[#E5DDD8]
                 pt-5
                 lg:block
               "
@@ -288,8 +288,8 @@ function Profile() {
                 overflow-hidden
                 rounded-xl
                 border
-                border-[#DED4C4]
-                bg-[#FFFDF9]
+                border-[#E5DDD8]
+                bg-[#FFFFFF]
                 shadow-[0_8px_30px_rgba(67,35,28,0.035)]
               "
             >
@@ -318,12 +318,12 @@ function Profile() {
                         text-left
                         transition-all
                         duration-300
-                        hover:bg-[#F2EBDD]/65
+                        hover:bg-[#FFFFFF]/65
                         sm:p-6
                         ${
                           index !==
                           accountOptions.length - 1
-                            ? "border-b border-[#EAE2D5]"
+                            ? "border-b border-[#F1ECE9]"
                             : ""
                         }
                       `}
@@ -353,12 +353,12 @@ function Profile() {
                             justify-center
                             rounded-full
                             border
-                            border-[#DED4C4]
-                            bg-[#F2EBDD]
+                            border-[#E5DDD8]
+                            bg-[#FFFFFF]
                             transition-all
                             duration-300
                             group-hover:border-[#C8A15A]
-                            group-hover:bg-[#FFFDF9]
+                            group-hover:bg-[#FFFFFF]
                             sm:h-12
                             sm:w-12
                           "
@@ -367,7 +367,7 @@ function Profile() {
                             className="
                               h-5
                               w-5
-                              text-[#5A3026]
+                              text-[#4B1F1B]
                             "
                             strokeWidth={1.3}
                           />
@@ -382,7 +382,7 @@ function Profile() {
                               text-[20px]
                               font-medium
                               leading-none
-                              text-[#43231C]
+                              text-[#351411]
                               sm:text-[21px]
                             "
                           >
@@ -421,7 +421,7 @@ function Profile() {
                           transition-all
                           duration-300
                           group-hover:border-[#D8BD83]
-                          group-hover:bg-[#F2EBDD]
+                          group-hover:bg-[#FFFFFF]
                         "
                       >
                         <FiChevronRight
@@ -456,12 +456,12 @@ function Profile() {
                   justify-between
                   gap-4
                   border-t
-                  border-[#DED4C4]
+                  border-[#E5DDD8]
                   p-5
                   text-left
                   transition-all
                   duration-300
-                  hover:bg-[#F2EBDD]/65
+                  hover:bg-[#FFFFFF]/65
                   sm:p-6
                 "
               >
@@ -488,12 +488,12 @@ function Profile() {
                       justify-center
                       rounded-full
                       border
-                      border-[#DED4C4]
-                      bg-[#F2EBDD]
+                      border-[#E5DDD8]
+                      bg-[#FFFFFF]
                       transition-all
                       duration-300
                       group-hover:border-[#C8A15A]
-                      group-hover:bg-[#FFFDF9]
+                      group-hover:bg-[#FFFFFF]
                       sm:h-12
                       sm:w-12
                     "
@@ -502,7 +502,7 @@ function Profile() {
                       className="
                         h-5
                         w-5
-                        text-[#5A3026]
+                        text-[#4B1F1B]
                       "
                       strokeWidth={1.3}
                     />
@@ -517,7 +517,7 @@ function Profile() {
                         text-[20px]
                         font-medium
                         leading-none
-                        text-[#43231C]
+                        text-[#351411]
                         sm:text-[21px]
                       "
                     >
@@ -555,7 +555,7 @@ function Profile() {
                     transition-all
                     duration-300
                     group-hover:border-[#D8BD83]
-                    group-hover:bg-[#F2EBDD]
+                    group-hover:bg-[#FFFFFF]
                   "
                 >
                   <FiChevronRight
@@ -586,7 +586,7 @@ function Profile() {
                 lg:hidden
               "
             >
-              <span className="h-px flex-1 bg-[#DED4C4]" />
+              <span className="h-px flex-1 bg-[#E5DDD8]" />
 
               <p
                 className="
@@ -599,7 +599,7 @@ function Profile() {
                 Rooted in Indian craft.
               </p>
 
-              <span className="h-px flex-1 bg-[#DED4C4]" />
+              <span className="h-px flex-1 bg-[#E5DDD8]" />
             </div>
           </div>
         </div>

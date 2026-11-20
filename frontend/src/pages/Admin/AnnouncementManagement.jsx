@@ -1,4 +1,14 @@
-import { useEffect, useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  FiBell,
+  FiCheck,
+  FiEdit2,
+  FiPlus,
+  FiRefreshCw,
+  FiTrash2,
+  FiX,
+} from "react-icons/fi";
 
 import {
   getAnnouncements,
@@ -7,547 +17,639 @@ import {
   deleteAnnouncement,
 } from "../../constants/api";
 
-function AnnouncementManagement() {
-  const [announcements, setAnnouncements] =
-    useState([]);
+const EMPTY_FORM = {
+  title: "",
+  message: "",
+  occasion: "General",
+  isActive: false,
+  priority: 0,
+  startDate: "",
+  endDate: "",
+};
 
-  const [newText, setNewText] =
-    useState("");
+const OCCASIONS = [
+  "General",
+  "Festive Sale",
+  "Diwali",
+  "Holi",
+  "Wedding Season",
+  "New Collection",
+  "Shipping Offer",
+  "Other",
+];
 
-  const [loading, setLoading] =
-    useState(true);
+const inputClass =
+  "w-full rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-3 py-2.5 text-sm text-[#351C19] outline-none focus:border-[#A98243]";
 
-  const [saving, setSaving] =
-    useState(false);
+const labelClass =
+  "mb-1.5 block text-[10px] font-semibold uppercase tracking-[1.3px] text-[#6B5651]";
 
-  const [error, setError] =
-    useState("");
+const toDateInput = (date) => {
+  if (!date) return "";
 
-  const [editingId, setEditingId] =
-    useState(null);
+  const value = new Date(date);
 
-  const [editingText, setEditingText] =
-    useState("");
+  if (Number.isNaN(value.getTime())) return "";
 
+  const localDate = new Date(
+    value.getTime() - value.getTimezoneOffset() * 60000
+  );
 
-  /*
-    =====================================================
-    INITIAL LOAD
-    =====================================================
-  */
+  return localDate.toISOString().slice(0, 16);
+};
 
-  useEffect(() => {
-    let cancelled = false;
+const formatDate = (date) => {
+  if (!date) return "No limit";
 
-    const fetchAnnouncements = async () => {
-      try {
-        const data =
-          await getAnnouncements();
+  const value = new Date(date);
 
-        if (cancelled) {
-          return;
-        }
+  if (Number.isNaN(value.getTime())) return "—";
 
-        setAnnouncements(data);
-        setError("");
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
+  return value.toLocaleString("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
 
-        console.error(
-          "Announcement loading error:",
-          error
-        );
+function Announcements() {
+  const [announcements, setAnnouncements] = useState([]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-        setError(
-          error.message ||
-            "Failed to load announcements."
-        );
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
+  const loadAnnouncements = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-    fetchAnnouncements();
-
-    return () => {
-      cancelled = true;
-    };
+      const data = await getAnnouncements();
+      setAnnouncements(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message || "Unable to load announcements.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+ useEffect(() => {
+  let cancelled = false;
 
-  /*
-    =====================================================
-    RELOAD AFTER ADMIN ACTION
-    =====================================================
-  */
-
-  const loadAnnouncements = async () => {
+  const fetchAnnouncements = async () => {
     try {
-      const data =
-        await getAnnouncements();
+      const data = await getAnnouncements();
 
-      setAnnouncements(data);
-      setError("");
+      if (!cancelled) {
+        setAnnouncements(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error(
-        "Announcement loading error:",
-        error
-      );
+      console.error("Failed to load announcements:", error);
 
-      setError(
-        error.message ||
-          "Failed to load announcements."
-      );
+      if (!cancelled) {
+        setAnnouncements([]);
+      }
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
     }
   };
 
+  fetchAnnouncements();
 
-  /*
-    =====================================================
-    CREATE
-    =====================================================
-  */
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
-  const handleCreate = async (event) => {
+  const startCreate = () => {
+    setEditingId(null);
+    setForm({ ...EMPTY_FORM });
+    setShowForm(true);
+    setError("");
+    setSuccess("");
+  };
+
+  const startEdit = (item) => {
+    setEditingId(item._id);
+
+    setForm({
+      title: item.title || "",
+      message: item.message || "",
+      occasion: item.occasion || "General",
+      isActive: Boolean(item.isActive),
+      priority: Number(item.priority || 0),
+      startDate: toDateInput(item.startDate),
+      endDate: toDateInput(item.endDate),
+    });
+
+    setShowForm(true);
+    setError("");
+    setSuccess("");
+  };
+
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
+
+    setForm((previous) => ({
+      ...previous,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!newText.trim()) {
+    setError("");
+    setSuccess("");
+
+    const title = form.title.trim();
+    const message = form.message.trim();
+
+    if (!title || !message) {
+      setError("Please enter both a title and a message.");
       return;
     }
 
-    try {
-      setSaving(true);
-      setError("");
+    const startDate = form.startDate
+      ? new Date(form.startDate)
+      : null;
 
-      await createAnnouncement({
-        text: newText.trim(),
-        isActive: true,
-        order:
-          announcements.length + 1,
-      });
+    const endDate = form.endDate
+      ? new Date(form.endDate)
+      : null;
 
-      setNewText("");
-
-      await loadAnnouncements();
-    } catch (error) {
-      console.error(
-        "Create announcement error:",
-        error
-      );
-
-      setError(
-        error.message ||
-          "Failed to create announcement."
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
-
-  /*
-    =====================================================
-    START EDIT
-    =====================================================
-  */
-
-  const handleStartEdit = (
-    announcement
-  ) => {
-    setEditingId(
-      announcement._id
-    );
-
-    setEditingText(
-      announcement.text
-    );
-  };
-
-
-  /*
-    =====================================================
-    CANCEL EDIT
-    =====================================================
-  */
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditingText("");
-  };
-
-
-  /*
-    =====================================================
-    SAVE EDIT
-    =====================================================
-  */
-
-  const handleSaveEdit = async (id) => {
-    if (!editingText.trim()) {
+    if (
+      startDate &&
+      endDate &&
+      endDate.getTime() <= startDate.getTime()
+    ) {
+      setError("End date must be after the start date.");
       return;
     }
 
+    const payload = {
+      title,
+      message,
+      occasion: form.occasion,
+      isActive: form.isActive,
+      priority: Number(form.priority),
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: endDate ? endDate.toISOString() : null,
+    };
+
     try {
       setSaving(true);
-      setError("");
 
-      await updateAnnouncement(id, {
-        text: editingText.trim(),
-      });
+      if (editingId) {
+        await updateAnnouncement(editingId, payload);
+        setSuccess("Announcement updated successfully.");
+      } else {
+        await createAnnouncement(payload);
+        setSuccess("Announcement created successfully.");
+      }
 
+      setShowForm(false);
       setEditingId(null);
-      setEditingText("");
+      setForm({ ...EMPTY_FORM });
 
       await loadAnnouncements();
-    } catch (error) {
-      console.error(
-        "Update announcement error:",
-        error
-      );
-
-      setError(
-        error.message ||
-          "Failed to update announcement."
-      );
+    } catch (err) {
+      setError(err.message || "Unable to save announcement.");
     } finally {
       setSaving(false);
     }
   };
 
-
-  /*
-    =====================================================
-    ACTIVATE / DEACTIVATE
-    =====================================================
-  */
-
-  const handleToggle = async (
-    announcement
-  ) => {
+  const handleToggle = async (item) => {
     try {
       setError("");
+      setSuccess("");
 
-      await updateAnnouncement(
-        announcement._id,
-        {
-          isActive:
-            !announcement.isActive,
-        }
+      await updateAnnouncement(item._id, {
+        title: item.title,
+        message: item.message,
+        occasion: item.occasion || "General",
+        isActive: !item.isActive,
+        priority: Number(item.priority || 0),
+        startDate: item.startDate || null,
+        endDate: item.endDate || null,
+      });
+
+      setSuccess(
+        `Announcement ${item.isActive ? "deactivated" : "activated"}.`
       );
 
       await loadAnnouncements();
-    } catch (error) {
-      console.error(
-        "Toggle announcement error:",
-        error
-      );
-
-      setError(
-        error.message ||
-          "Failed to update announcement."
-      );
+    } catch (err) {
+      setError(err.message || "Unable to update announcement status.");
     }
   };
 
-
-  /*
-    =====================================================
-    DELETE
-    =====================================================
-  */
-
-  const handleDelete = async (id) => {
-    const confirmed =
-      window.confirm(
-        "Delete this announcement?"
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setError("");
-
-      await deleteAnnouncement(id);
-
-      await loadAnnouncements();
-    } catch (error) {
-      console.error(
-        "Delete announcement error:",
-        error
-      );
-
-      setError(
-        error.message ||
-          "Failed to delete announcement."
-      );
-    }
-  };
-
-
-  /*
-    =====================================================
-    LOADING
-    =====================================================
-  */
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FAF7F0] p-8">
-        <p className="font-['Poppins'] text-sm text-[#71655B]">
-          Loading announcements...
-        </p>
-      </div>
+  const handleDelete = async (item) => {
+    const confirmed = window.confirm(
+      `Delete "${item.title}"? This cannot be undone.`
     );
-  }
 
+    if (!confirmed) return;
 
-  /*
-    =====================================================
-    UI
-    =====================================================
-  */
+    try {
+      setError("");
+      setSuccess("");
+
+      await deleteAnnouncement(item._id);
+
+      setSuccess("Announcement deleted successfully.");
+
+      if (editingId === item._id) {
+        setEditingId(null);
+        setShowForm(false);
+        setForm({ ...EMPTY_FORM });
+      }
+
+      await loadAnnouncements();
+    } catch (err) {
+      setError(err.message || "Unable to delete announcement.");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] p-5 sm:p-8">
-      <div className="mx-auto max-w-[1000px]">
+    <main className="min-h-screen bg-[#FFFFFF] p-4 text-[#351C19] sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-[1400px]">
+        <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[3px] text-[#A98243]">
+              Store Management
+            </p>
 
-        {/* Page heading */}
+            <h1 className="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#351411] sm:text-5xl">
+              Announcement Bar
+            </h1>
 
-        <div className="mb-8">
-          <p className="mb-2 font-['Poppins'] text-[9px] font-medium uppercase tracking-[2.5px] text-[#A98243]">
-            Website Settings
-          </p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B5651]">
+              Manage the messages displayed at the top of your Sirraha
+              storefront. Announcements are informational only.
+            </p>
+          </div>
 
-          <h1 className="font-['Cormorant_Garamond'] text-[36px] text-[#43231C]">
-            Announcement Bar
-          </h1>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={loadAnnouncements}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-4 py-3 text-xs font-medium text-[#4B1F1B] hover:bg-[#FFFFFF]"
+            >
+              <FiRefreshCw size={14} />
+              Refresh
+            </button>
 
-          <p className="mt-2 font-['Poppins'] text-sm text-[#71655B]">
-            Manage the messages displayed at
-            the top of the Sirraha website.
-          </p>
+            <button
+              type="button"
+              onClick={startCreate}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4B1F1B] px-4 py-3 text-xs font-medium text-[#FFFFFF] hover:bg-[#351411]"
+            >
+              <FiPlus size={15} />
+              Create Announcement
+            </button>
+          </div>
         </div>
 
-
-        {/* Error */}
-
         {error && (
-          <div className="mb-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div
+            role="alert"
+            className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          >
             {error}
           </div>
         )}
 
-
-        {/* Add announcement */}
-
-        <form
-          onSubmit={handleCreate}
-          className="mb-8 border border-[#DED4C4] bg-[#FFFDF9] p-5 sm:p-6"
-        >
-          <h2 className="mb-4 font-['Cormorant_Garamond'] text-[25px] text-[#43231C]">
-            Add New Announcement
-          </h2>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              type="text"
-              value={newText}
-              onChange={(event) =>
-                setNewText(
-                  event.target.value
-                )
-              }
-              placeholder="Enter announcement text..."
-              className="min-h-[46px] flex-1 border border-[#DED4C4] bg-[#FAF7F0] px-4 text-sm text-[#3A2A20] outline-none focus:border-[#C8A15A]"
-            />
-
-            <button
-              type="submit"
-              disabled={
-                saving ||
-                !newText.trim()
-              }
-              className="min-h-[46px] bg-[#5A3026] px-6 font-['Poppins'] text-[9px] font-medium uppercase tracking-[1.8px] text-[#FFFDF9] transition hover:bg-[#43231C] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Adding..." : "Add"}
-            </button>
+        {success && (
+          <div
+            role="status"
+            className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+          >
+            {success}
           </div>
-        </form>
+        )}
 
+        {showForm && (
+          <section className="mb-8 rounded-xl border border-[#E5DDD8] bg-[#FFFFFF] p-5 shadow-sm sm:p-7">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[9px] uppercase tracking-[2px] text-[#A98243]">
+                  {editingId ? "Edit announcement" : "New announcement"}
+                </p>
 
-        {/* Existing announcements */}
+                <h2 className="mt-1 font-['Cormorant_Garamond'] text-3xl text-[#351411]">
+                  {editingId ? "Update Message" : "Create Message"}
+                </h2>
+              </div>
 
-        <div className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                aria-label="Close announcement form"
+                className="rounded-full p-2 text-[#6B5651] hover:bg-[#FFFFFF]"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
 
-          {announcements.length === 0 ? (
-            <div className="border border-[#DED4C4] bg-[#FFFDF9] p-8 text-center">
-              <p className="font-['Poppins'] text-sm text-[#71655B]">
-                No announcements found.
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label className={labelClass} htmlFor="announcement-title">
+                    Internal title
+                  </label>
+
+                  <input
+                    id="announcement-title"
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
+                    maxLength={100}
+                    required
+                    placeholder="Example: Diwali Special 2026"
+                    className={inputClass}
+                  />
+
+                  <p className="mt-1 text-[10px] text-[#918477]">
+                    Used to identify the announcement in your admin panel.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={labelClass} htmlFor="announcement-occasion">
+                    Occasion
+                  </label>
+
+                  <select
+                    id="announcement-occasion"
+                    name="occasion"
+                    value={form.occasion}
+                    onChange={handleChange}
+                    className={inputClass}
+                  >
+                    {OCCASIONS.map((occasion) => (
+                      <option key={occasion} value={occasion}>
+                        {occasion}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="announcement-message">
+                  Customer-facing message
+                </label>
+
+                <textarea
+                  id="announcement-message"
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
+                  maxLength={250}
+                  rows={3}
+                  required
+                  placeholder="Example: Diwali Special — Enjoy 20% OFF on selected styles."
+                  className={inputClass}
+                />
+
+                <div className="mt-1 text-right text-[10px] text-[#918477]">
+                  {form.message.length}/250 characters
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass} htmlFor="announcement-start">
+                    Start date and time (optional)
+                  </label>
+
+                  <input
+                    id="announcement-start"
+                    type="datetime-local"
+                    name="startDate"
+                    value={form.startDate}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+
+                  <p className="mt-1 text-[10px] text-[#918477]">
+                    Leave blank to allow immediate display when active.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={labelClass} htmlFor="announcement-end">
+                    End date and time (optional)
+                  </label>
+
+                  <input
+                    id="announcement-end"
+                    type="datetime-local"
+                    name="endDate"
+                    value={form.endDate}
+                    onChange={handleChange}
+                    min={form.startDate || undefined}
+                    className={inputClass}
+                  />
+
+                  <p className="mt-1 text-[10px] text-[#918477]">
+                    Leave blank if the message has no scheduled end.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass} htmlFor="announcement-priority">
+                    Priority (0–100)
+                  </label>
+
+                  <input
+                    id="announcement-priority"
+                    type="number"
+                    name="priority"
+                    value={form.priority}
+                    onChange={handleChange}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className={inputClass}
+                  />
+
+                  <p className="mt-1 text-[10px] text-[#918477]">
+                    Higher priority wins when announcements overlap.
+                  </p>
+                </div>
+
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] p-4">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    checked={form.isActive}
+                    onChange={handleChange}
+                    className="h-4 w-4 accent-[#4B1F1B]"
+                  />
+
+                  <span>
+                    <span className="block text-sm font-medium text-[#351411]">
+                      Active announcement
+                    </span>
+                    <span className="mt-1 block text-xs text-[#6B5651]">
+                      Only active, currently scheduled messages can appear.
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex flex-wrap gap-3 border-t border-[#E5DDD8] pt-5">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#4B1F1B] px-5 py-3 text-xs font-medium text-[#FFFFFF] hover:bg-[#351411] disabled:opacity-60"
+                >
+                  <FiCheck size={15} />
+                  {saving
+                    ? "Saving..."
+                    : editingId
+                      ? "Save Changes"
+                      : "Create Announcement"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setForm({ ...EMPTY_FORM });
+                  }}
+                  className="rounded-lg border border-[#E5DDD8] px-5 py-3 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+
+        <section className="overflow-hidden rounded-xl border border-[#E5DDD8] bg-[#FFFFFF] shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#E5DDD8] px-5 py-4 sm:px-6">
+            <div>
+              <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
+                All Announcements
+              </h2>
+
+              <p className="mt-1 text-xs text-[#6B5651]">
+                {announcements.length} saved announcement
+                {announcements.length === 1 ? "" : "s"}
               </p>
             </div>
+
+            <FiBell className="text-[#A98243]" size={21} />
+          </div>
+
+          {loading ? (
+            <div className="px-6 py-12 text-center text-sm text-[#6B5651]">
+              Loading announcements...
+            </div>
+          ) : announcements.length === 0 ? (
+            <div className="px-6 py-14 text-center">
+              <FiBell className="mx-auto mb-3 text-[#A98243]" size={28} />
+
+              <p className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
+                No announcements yet
+              </p>
+
+              <p className="mt-2 text-sm text-[#6B5651]">
+                Create your first message for the Sirraha storefront.
+              </p>
+
+              <button
+                type="button"
+                onClick={startCreate}
+                className="mt-5 rounded-lg bg-[#4B1F1B] px-5 py-3 text-xs text-[#FFFFFF]"
+              >
+                Create Announcement
+              </button>
+            </div>
           ) : (
-            announcements.map(
-              (
-                announcement,
-                index
-              ) => (
-                <div
-                  key={
-                    announcement._id
-                  }
-                  className="border border-[#DED4C4] bg-[#FFFDF9] p-5 sm:p-6"
-                >
-                  <div className="flex flex-col gap-5">
+            <div className="divide-y divide-[#E9E0D3]">
+              {announcements.map((item) => (
+                <article key={item._id} className="p-5 sm:px-6">
+                  <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-medium text-[#351411]">
+                          {item.title}
+                        </h3>
 
-                    {/* Top row */}
+                        <span className="rounded-full bg-[#FFFFFF] px-2.5 py-1 text-[10px] text-[#4B1F1B]">
+                          {item.occasion || "General"}
+                        </span>
 
-                    <div className="flex items-center justify-between">
-                      <span className="font-['Poppins'] text-[9px] font-medium uppercase tracking-[1.5px] text-[#A98243]">
-                        Announcement{" "}
-                        {index + 1}
-                      </span>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[10px] ${
+                            item.isActive
+                              ? "bg-green-50 text-green-800"
+                              : "bg-[#FFFFFF] text-[#6B5651]"
+                          }`}
+                        >
+                          {item.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
 
-                      <span
-                        className={`
-                          rounded-full
-                          px-3
-                          py-1
-                          font-['Poppins']
-                          text-[8px]
-                          font-medium
-                          uppercase
-                          tracking-[1px]
-                          ${
-                            announcement.isActive
-                              ? "bg-[#5A3026] text-[#FFFDF9]"
-                              : "bg-[#F2EBDD] text-[#71655B]"
-                          }
-                        `}
-                      >
-                        {announcement.isActive
-                          ? "Active"
-                          : "Inactive"}
-                      </span>
+                      <p className="mt-3 break-words text-sm leading-6 text-[#5C5047]">
+                        {item.message}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[10px] text-[#918477]">
+                        <span>Priority: {item.priority ?? 0}</span>
+                        <span>Starts: {formatDate(item.startDate)}</span>
+                        <span>Ends: {formatDate(item.endDate)}</span>
+                      </div>
                     </div>
 
-
-                    {/* Announcement text */}
-
-                    {editingId ===
-                    announcement._id ? (
-                      <div className="flex flex-col gap-3">
-
-                        <input
-                          type="text"
-                          value={editingText}
-                          onChange={(
-                            event
-                          ) =>
-                            setEditingText(
-                              event.target
-                                .value
-                            )
-                          }
-                          className="min-h-[46px] w-full border border-[#DED4C4] bg-[#FAF7F0] px-4 text-sm text-[#3A2A20] outline-none focus:border-[#C8A15A]"
-                        />
-
-                        <div className="flex gap-2">
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleSaveEdit(
-                                announcement._id
-                              )
-                            }
-                            disabled={saving}
-                            className="bg-[#5A3026] px-5 py-2.5 font-['Poppins'] text-[8px] font-medium uppercase tracking-[1.5px] text-[#FFFDF9]"
-                          >
-                            {saving
-                              ? "Saving..."
-                              : "Save"}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={
-                              handleCancelEdit
-                            }
-                            className="border border-[#DED4C4] px-5 py-2.5 font-['Poppins'] text-[8px] font-medium uppercase tracking-[1.5px] text-[#5A3026]"
-                          >
-                            Cancel
-                          </button>
-
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="font-['Poppins'] text-sm leading-7 text-[#3A2A20]">
-                        {announcement.text}
-                      </p>
-                    )}
-
-
-                    {/* Actions */}
-
-                    <div className="flex flex-wrap gap-2 border-t border-[#EAE2D5] pt-4">
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleToggle(item)}
+                        className="rounded-lg border border-[#E5DDD8] px-3 py-2 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
+                      >
+                        {item.isActive ? "Deactivate" : "Activate"}
+                      </button>
 
                       <button
                         type="button"
-                        onClick={() =>
-                          handleStartEdit(
-                            announcement
-                          )
-                        }
-                        className="border border-[#DED4C4] px-4 py-2 font-['Poppins'] text-[8px] font-medium uppercase tracking-[1.4px] text-[#5A3026] transition hover:border-[#C8A15A]"
+                        onClick={() => startEdit(item)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DDD8] px-3 py-2 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
                       >
+                        <FiEdit2 size={12} />
                         Edit
                       </button>
 
-
                       <button
                         type="button"
-                        onClick={() =>
-                          handleToggle(
-                            announcement
-                          )
-                        }
-                        className="border border-[#DED4C4] px-4 py-2 font-['Poppins'] text-[8px] font-medium uppercase tracking-[1.4px] text-[#5A3026] transition hover:border-[#C8A15A]"
+                        onClick={() => handleDelete(item)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs text-red-700 hover:bg-red-50"
                       >
-                        {announcement.isActive
-                          ? "Deactivate"
-                          : "Activate"}
-                      </button>
-
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleDelete(
-                            announcement._id
-                          )
-                        }
-                        className="border border-red-200 px-4 py-2 font-['Poppins'] text-[8px] font-medium uppercase tracking-[1.4px] text-red-600 transition hover:bg-red-50"
-                      >
+                        <FiTrash2 size={12} />
                         Delete
                       </button>
-
                     </div>
                   </div>
-                </div>
-              )
-            )
+                </article>
+              ))}
+            </div>
           )}
-
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
 
-export default AnnouncementManagement;
+export default Announcements;

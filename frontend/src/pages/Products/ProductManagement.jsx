@@ -40,14 +40,14 @@ const CATEGORIES = [
 ];
 
 const COLORS = {
-  espresso: "#43231C",
-  brown: "#5A3026",
+  espresso: "#351411",
+  brown: "#4B1F1B",
   brownSoft: "#765348",
   gold: "#C8A15A",
   goldSoft: "#EFE3C8",
   cream: "#FBF8F2",
-  creamDeep: "#F5EFE5",
-  paper: "#FFFDF9",
+  creamDeep: "#FFFFFF",
+  paper: "#FFFFFF",
   border: "#E8DED2",
   borderDark: "#D9CBBE",
   text: "#2D211D",
@@ -1568,7 +1568,7 @@ const ProductManagement = () => {
                   {uploading ? (
                     <>
                       <div
-                        className="mb-3 h-7 w-7 animate-spin rounded-full border-2 border-[#E7D9BF] border-t-[#5A3026]"
+                        className="mb-3 h-7 w-7 animate-spin rounded-full border-2 border-[#E7D9BF] border-t-[#4B1F1B]"
                       />
                       <p
                         className="text-sm font-medium"
@@ -2063,7 +2063,7 @@ const CheckSetting = ({
       type="checkbox"
       checked={checked}
       onChange={(event) => onChange(event.target.checked)}
-      className="h-4 w-4 cursor-pointer accent-[#5A3026]"
+      className="h-4 w-4 cursor-pointer accent-[#4B1F1B]"
     />
   </label>
 );

@@ -1,54 +1,37 @@
+
 @import "tailwindcss";
 
 /* ========================================
    SIRRAHA GLOBAL THEME
-   Warm Brown + Cream + Antique Gold
+   Deep Brown + White + Antique Gold
    ======================================== */
 
 :root {
-  /* ========================================
-     BRAND COLORS
-     ======================================== */
+  /* BRAND COLORS */
+  --primary: #4B1F1B;
+  --primary-dark: #351411;
+  --primary-light: #69352D;
 
-  --primary: #5A3026;
-  --primary-dark: #43231C;
-  --primary-light: #795033;
+  /* CLEAN WHITE BACKGROUNDS */
+  --secondary: #FFFFFF;
+  --cream: #FFFFFF;
+  --warm-white: #FFFFFF;
 
-  /* ========================================
-     BACKGROUNDS
-     ======================================== */
-
-  --secondary: #FAF7F0;
-  --cream: #F2EBDD;
-  --warm-white: #FFFDF9;
-
-  /* ========================================
-     ANTIQUE GOLD
-     ======================================== */
-
+  /* ANTIQUE GOLD */
   --gold: #C8A15A;
-  --gold-light: #D8BD83;
+  --gold-light: #DFC58F;
   --gold-dark: #A98243;
 
-  /* ========================================
-     TEXT
-     ======================================== */
+  /* TEXT */
+  --text: #351C19;
+  --text-secondary: #6B5651;
+  --text-muted: #91847E;
 
-  --text: #3A2A20;
-  --text-secondary: #71655B;
-  --text-muted: #918477;
+  /* BORDERS */
+  --border: #E5DDD8;
+  --border-light: #F1ECE9;
 
-  /* ========================================
-     BORDERS
-     ======================================== */
-
-  --border: #DED4C4;
-  --border-light: #EAE2D5;
-
-  /* ========================================
-     GLOBAL LAYOUT
-     ======================================== */
-
+  /* GLOBAL LAYOUT */
   --page-padding: 1.25rem;
   --content-max-width: 1400px;
   --sirraha-header-height: 183px;
@@ -79,12 +62,9 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-
   font-family: "Poppins", sans-serif;
-
-  background: var(--secondary);
+  background: #FFFFFF;
   color: var(--text);
-
   overflow-x: hidden;
 }
 
@@ -92,7 +72,6 @@ body {
   width: 100%;
   min-height: 100vh;
 }
-
 
 /* ========================================
    IMAGES
@@ -102,7 +81,6 @@ img {
   max-width: 100%;
   display: block;
 }
-
 
 /* ========================================
    HEADINGS
@@ -118,7 +96,6 @@ h6 {
   margin: 0;
 }
 
-
 /* ========================================
    PARAGRAPHS
    ======================================== */
@@ -126,7 +103,6 @@ h6 {
 p {
   margin: 0;
 }
-
 
 /* ========================================
    LINKS
@@ -136,7 +112,6 @@ a {
   text-decoration: none;
   color: inherit;
 }
-
 
 /* ========================================
    FORM ELEMENTS
@@ -153,7 +128,6 @@ button {
   cursor: pointer;
 }
 
-
 /* ========================================
    GLOBAL PAGE CONTAINER
    ======================================== */
@@ -165,7 +139,6 @@ button {
   padding-inline: var(--page-padding);
 }
 
-
 /* ========================================
    GLOBAL PAGE SECTION
    ======================================== */
@@ -175,91 +148,66 @@ button {
   padding-block: 4rem;
 }
 
-
 /* ========================================
    SIRRAHA LOGO
    ======================================== */
 
 .sirraha-logo {
   font-family: "Cormorant Garamond", Georgia, serif;
-
   font-size: 30px;
   font-weight: 500;
-
   line-height: 1;
   letter-spacing: 0.3em;
-
   color: var(--primary);
-
   white-space: nowrap;
   text-decoration: none;
-
   background: transparent;
   border: none;
-
   padding: 0;
   margin: 0;
-
   cursor: pointer;
 }
 
-
 /* ========================================
    ANNOUNCEMENT BAR
+   Deep brown with white text
    ======================================== */
 
 .announcement-bar {
   width: 100%;
   height: 39px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: var(--primary);
-  color: var(--secondary);
-
+  color: #FFFFFF;
   overflow: hidden;
   position: relative;
-
   z-index: 500;
-
   font-family: "Poppins", sans-serif;
-
   font-size: 11px;
   font-weight: 500;
-
   letter-spacing: 0.22em;
   line-height: 1;
-
   text-align: center;
   text-transform: uppercase;
-
   white-space: nowrap;
 }
 
 .announcement-inner {
   width: 100%;
   height: 100%;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   overflow: hidden;
 }
 
 .announcement-text {
   display: inline-block;
-
   padding-inline: 20px;
-
-  animation:
-    announcementFadeIn
-    0.7s
-    ease both;
+  animation: announcementFadeIn 0.7s ease both;
 }
-
 
 /* ========================================
    ANNOUNCEMENT ANIMATION
@@ -277,7 +225,6 @@ button {
   }
 }
 
-
 /* ========================================
    GOLD ACCENTS
    ======================================== */
@@ -290,17 +237,14 @@ button {
   border-color: var(--gold);
 }
 
-
 /* ========================================
    PRIMARY BROWN BUTTON
    ======================================== */
 
 .sirraha-button {
   background: var(--primary);
-  color: var(--secondary);
-
+  color: #FFFFFF;
   border: 1px solid var(--primary);
-
   transition:
     background-color 0.25s ease,
     border-color 0.25s ease,
@@ -312,17 +256,14 @@ button {
   border-color: var(--primary-dark);
 }
 
-
 /* ========================================
    ANTIQUE GOLD BUTTON
    ======================================== */
 
 .sirraha-gold-button {
   background: var(--gold);
-  color: #3A2A20;
-
+  color: #351C19;
   border: 1px solid var(--gold);
-
   transition:
     background-color 0.25s ease,
     border-color 0.25s ease,
@@ -333,7 +274,6 @@ button {
   background: var(--gold-dark);
   border-color: var(--gold-dark);
 }
-
 
 /* ========================================
    RESPONSIVE SPACING
@@ -357,7 +297,6 @@ button {
   }
 }
 
-
 /* ========================================
    MOBILE ANNOUNCEMENT BAR
    ======================================== */
@@ -365,9 +304,7 @@ button {
 @media (max-width: 640px) {
   .announcement-bar {
     height: 34px;
-
     padding: 0 12px;
-
     font-size: 8px;
     letter-spacing: 0.13em;
   }
@@ -377,6 +314,11 @@ button {
     text-align: center;
   }
 }
+
+/* ========================================
+   HERO CONTENT ANIMATION
+   ======================================== */
+
 @keyframes heroContentIn {
   0% {
     opacity: 0;
@@ -388,9 +330,10 @@ button {
     transform: translateY(0);
   }
 }
-/* =========================================================
+
+/* ========================================
    SIRRAHA SEARCH ANIMATIONS
-========================================================= */
+   ======================================== */
 
 @keyframes sirrahaSearchOpen {
   from {
@@ -416,6 +359,9 @@ button {
   }
 }
 
+/* ========================================
+   ADMIN SIDEBAR SCROLLBAR
+   ======================================== */
 
 .admin-sidebar-scroll::-webkit-scrollbar {
   display: none;
@@ -424,4 +370,102 @@ button {
 .admin-sidebar-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+/* ========================================
+   ROTATING ANNOUNCEMENT TEXT
+   ======================================== */
+
+.announcement-rotating-text {
+  animation: sirrahaAnnouncementFade 0.65s ease both;
+}
+
+@keyframes sirrahaAnnouncementFade {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   CUSTOMER REVIEWS CAROUSEL
+   ======================================== */
+
+.sirraha-reviews-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.sirraha-reviews-track {
+  display: flex;
+  width: max-content;
+  gap: 1.25rem;
+}
+
+.sirraha-reviews-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  gap: 1.25rem;
+}
+
+.sirraha-review-card {
+  display: flex;
+  width: 300px;
+  flex: 0 0 300px;
+}
+
+.sirraha-reviews-animated {
+  animation: sirrahaReviewsSlide 40s linear infinite;
+}
+
+.sirraha-reviews-animated:hover {
+  animation-play-state: paused;
+}
+
+.sirraha-reviews-viewport:hover
+.sirraha-reviews-animated {
+  animation-play-state: paused;
+}
+
+@keyframes sirrahaReviewsSlide {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .sirraha-reviews-group {
+    gap: 0.875rem;
+  }
+
+  .sirraha-reviews-track {
+    gap: 0.875rem;
+  }
+
+  .sirraha-review-card {
+    width: 78vw;
+    flex-basis: 78vw;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY: REDUCED MOTION
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-rotating-text,
+  .announcement-text,
+  .sirraha-reviews-animated {
+    animation: none !important;
+  }
 }

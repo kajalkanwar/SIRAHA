@@ -1,1941 +1,1656 @@
-import { useState } from "react";
+
+
+import { useCallback, useEffect, useState } from "react";
 
 import {
+
+  FiArrowLeft,
+
   FiArrowRight,
-  FiCalendar,
+
   FiCheck,
+
   FiChevronRight,
+
   FiCreditCard,
-  FiExternalLink,
+
   FiMapPin,
+
   FiPackage,
+
+  FiRefreshCw,
+
   FiShoppingBag,
+
   FiTruck,
+
   FiXCircle,
+
 } from "react-icons/fi";
 
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = (
+
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+
+).replace(/\/+$/, "");
+
+const STATUS_STEPS = [
+
+  { key: "PENDING", label: "Order Placed", icon: FiShoppingBag },
+
+  { key: "CONFIRMED", label: "Confirmed", icon: FiCheck },
+
+  { key: "PROCESSING", label: "Processing", icon: FiPackage },
+
+  { key: "SHIPPED", label: "Shipped", icon: FiTruck },
+
+  { key: "DELIVERED", label: "Delivered", icon: FiCheck },
+
+];
+
+const normalizeStatus = (status) => {
+
+  const value = String(status || "PENDING")
+
+    .trim()
+
+    .toUpperCase()
+
+    .replace(/[\s-]+/g, "_");
+
+  const aliases = {
+
+    PLACED: "PENDING",
+
+    ORDER_PLACED: "PENDING",
+
+    CONFIRM: "CONFIRMED",
+
+    PACKED: "PROCESSING",
+
+    PACKING: "PROCESSING",
+
+    SHIPPING: "SHIPPED",
+
+    COMPLETE: "DELIVERED",
+
+    COMPLETED: "DELIVERED",
+
+    CANCELED: "CANCELLED",
+
+  };
+
+  return aliases[value] || value;
+
+};
+
+const getOrderStatus = (order) =>
+
+  normalizeStatus(order?.orderStatus ?? order?.status);
+
+const formatDate = (value, long = false) => {
+
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("en-IN", {
+
+    day: "numeric",
+
+    month: long ? "long" : "short",
+
+    year: "numeric",
+
+  });
+
+};
+
+const formatPrice = (value) =>
+
+  Number(value || 0).toLocaleString("en-IN", {
+
+    maximumFractionDigits: 2,
+
+  });
+
+const getPaymentMethod = (method) => {
+
+  const value = String(method || "").toUpperCase();
+
+  if (value === "COD") return "Cash on Delivery";
+
+  if (value === "RAZORPAY") return "Online Payment";
+
+  return method || "Not specified";
+
+};
+
+const getProductName = (item) =>
+
+  item?.name || item?.productName || item?.product?.name || "Sirraha Product";
+
+const getProductImage = (item) =>
+
+  item?.image ||
+
+  item?.imageUrl ||
+
+  (Array.isArray(item?.images) ? item.images[0] : "") ||
+
+  (Array.isArray(item?.product?.images) ? item.product.images[0] : "") ||
+
+  "";
+
+async function requestTrackedOrder(details, signal) {
+
+  const url = new URL(`${API_URL}/orders/track`, window.location.origin);
+
+  url.searchParams.set("orderId", details.orderId);
+
+  url.searchParams.set("email", details.email);
+
+  // Use a relative URL for same-origin APIs and the configured absolute*
+
+  // API URL for a separate backend.*
+
+  const endpoint = /^https?:\/\//i.test(API_URL)
+
+    ? url.toString()
+
+    : `${API_URL}/orders/track?${url.searchParams.toString()}`;
+
+  const response = await fetch(endpoint, {
+
+    method: "GET",
+
+    headers: { Accept: "application/json" },
+
+    cache: "no-store",
+
+    signal,
+
+  });
+
+  let data;
+
+  try {
+
+    data = await response.json();
+
+  } catch {
+
+    throw new Error("The server returned an invalid response.");
+
+  }
+
+  if (!response.ok) {
+
+    throw new Error(
+
+      data?.message || "We could not find an order matching those details."
+
+    );
+
+  }
+
+  const foundOrder = data?.order ?? data;
+
+  if (!foundOrder || !(foundOrder._id || foundOrder.orderNumber)) {
+
+    throw new Error("We could not find an order matching those details.");
+
+  }
+
+  return foundOrder;
+
+}
 
 function TrackOrder() {
+
   const navigate = useNavigate();
 
-  // ============================================================
-  // STATE
-  // ============================================================
-
   const [orderId, setOrderId] = useState("");
+
   const [email, setEmail] = useState("");
 
   const [order, setOrder] = useState(null);
 
+  const [trackedDetails, setTrackedDetails] = useState(null);
+
   const [loading, setLoading] = useState(false);
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState("");
 
-  // ============================================================
-  // TRACK ORDER
-  // ============================================================
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const handleTrackOrder = async (event) => {
-    event.preventDefault();
+  const [exchangeItem, setExchangeItem] = useState(null);
 
-    setError("");
-    setOrder(null);
+  const [exchangeExpired, setExchangeExpired] = useState(false);
 
-    const cleanOrderId = orderId.trim();
-    const cleanEmail = email.trim().toLowerCase();
+  const currentStatus = getOrderStatus(order);
 
-    if (!cleanOrderId) {
-      setError("Please enter your order ID.");
-      return;
-    }
+  const currentStatusIndex = STATUS_STEPS.findIndex(
 
-    if (!cleanEmail) {
-      setError("Please enter the email address used for your order.");
-      return;
+    (step) => step.key === currentStatus
+
+  );
+
+  const isCancelled = currentStatus === "CANCELLED";
+
+  const isDelivered = currentStatus === "DELIVERED";
+
+  // Exchange is available for 7 calendar days after delivery.*
+
+  const isExchangeEligible = (() => {
+
+    if (!isDelivered || !order?.deliveredAt) return false;
+
+    const deliveredDate = new Date(order.deliveredAt);
+
+    if (Number.isNaN(deliveredDate.getTime())) return false;
+
+    const deadline = new Date(deliveredDate);
+
+    deadline.setDate(deadline.getDate() + 7);
+
+    return new Date() <= deadline;
+
+  })();
+
+  const deliveryAddress = order
+
+    ? [order.address, order.city, order.state, order.pincode]
+
+        .filter(Boolean)
+
+        .join(", ")
+
+    : "";
+
+  const courierName =
+
+    order?.courierPartner || order?.courier || order?.shippingPartner || "";
+
+  const trackingNumber =
+
+    order?.trackingNumber || order?.trackingId || order?.awbNumber || "";
+
+  const trackingUrl = order?.trackingUrl || order?.trackingLink || "";
+
+  const expectedDelivery =
+
+    order?.expectedDelivery ||
+
+    order?.expectedDeliveryDate ||
+
+    order?.deliveryDate ||
+
+    "";
+
+  const fetchOrder = useCallback(async (details, background = false) => {
+
+    if (!details?.orderId || !details?.email) return false;
+
+    if (background) {
+
+      setRefreshing(true);
+
+    } else {
+
+      setLoading(true);
+
+      setError("");
+
     }
 
     try {
-      setLoading(true);
 
-      const response = await fetch(
-        `${API_URL}/orders/track?orderId=${encodeURIComponent(
-          cleanOrderId
-        )}&email=${encodeURIComponent(cleanEmail)}`
-      );
+      const controller = new AbortController();
 
-      let data = {};
+      const foundOrder = await requestTrackedOrder(details, controller.signal);
 
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error("Invalid response from the server.");
-      }
+      setOrder(foundOrder);
 
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Unable to find your order."
-        );
-      }
+      setLastUpdated(new Date());
 
-      if (!data.order) {
-        throw new Error(
-          "We could not find an order matching those details."
-        );
-      }
+      setError("");
 
-      setOrder(data.order);
+      return true;
+
     } catch (err) {
+
+      if (err.name !== "AbortError") {
+
+        console.error("Track order error:", err);
+
+        // Preserve the displayed order if a background refresh fails.*
+
+        if (!background) {
+
+          setError(err.message || "Unable to track your order.");
+
+          setOrder(null);
+
+        }
+
+      }
+
+      return false;
+
+    } finally {
+
+      setLoading(false);
+
+      setRefreshing(false);
+
+    }
+
+  }, []);
+
+  const handleTrackOrder = async (event) => {
+
+    event.preventDefault();
+
+    const details = {
+
+      orderId: orderId.trim(),
+
+      email: email.trim().toLowerCase(),
+
+    };
+
+    if (!details.orderId) {
+
+      setError("Please enter your order ID.");
+
+      return;
+
+    }
+
+    if (!details.email) {
+
+      setError("Please enter the email address used for your order.");
+
+      return;
+
+    }
+
+    setError("");
+
+    setOrder(null);
+
+    setTrackedDetails(null);
+
+    setLoading(true);
+
+    try {
+
+      const foundOrder = await requestTrackedOrder(details);
+
+      setOrder(foundOrder);
+
+      setTrackedDetails(details);
+
+      setLastUpdated(new Date());
+
+    } catch (err) {
+
       console.error("Track order error:", err);
 
-      setError(
-        err.message ||
-          "We could not find an order matching those details."
-      );
+      setError(err.message || "Unable to track your order.");
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
 
-  // ============================================================
-  // TRACK ANOTHER ORDER
-  // ============================================================
+  // Poll for status changes while an order is being displayed.*
+
+useEffect(() => {
+
+  if (!trackedDetails) return undefined;
+
+  let active = true;
+
+  let inFlight = false;
+
+  let controller = null;
+
+  const refreshOrder = async () => {
+
+    if (inFlight || !active) return;
+
+    inFlight = true;
+
+    controller = new AbortController();
+
+    try {
+
+      const latestOrder = await requestTrackedOrder(
+
+        trackedDetails,
+
+        controller.signal
+
+      );
+
+      if (active) {
+
+        setOrder(latestOrder);
+
+        setLastUpdated(new Date());
+
+      }
+
+    } catch (err) {
+
+      if (err.name !== "AbortError") {
+
+        console.error("Background order refresh failed:", err);
+
+      }
+
+    } finally {
+
+      inFlight = false;
+
+    }
+
+  };
+
+  const intervalId = window.setInterval(refreshOrder, 15000);
+
+  return () => {
+
+    active = false;
+
+    window.clearInterval(intervalId);
+
+    controller?.abort();
+
+  };
+
+}, [trackedDetails]);
+
+  const handleRefresh = () => {
+
+    if (trackedDetails) {
+
+      fetchOrder(trackedDetails, true);
+
+    }
+
+  };
 
   const handleTrackAnother = () => {
+
     setOrder(null);
-    setError("");
+
+    setTrackedDetails(null);
+
     setOrderId("");
+
     setEmail("");
+
+    setError("");
+
+    setLastUpdated(null);
+
   };
-
-  // ============================================================
-  // DATE FORMATTER
-  // ============================================================
-
-  const formatDate = (date) => {
-    if (!date) return "";
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "";
-    }
-
-    return parsedDate.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  // ============================================================
-  // LONG DATE FORMATTER
-  // ============================================================
-
-  const formatLongDate = (date) => {
-    if (!date) return "";
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "";
-    }
-
-    return parsedDate.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  // ============================================================
-  // MONEY FORMATTER
-  // ============================================================
-
-  const formatPrice = (value) => {
-    return Number(value || 0).toLocaleString("en-IN");
-  };
-
-  // ============================================================
-  // NORMALIZE STATUS
-  // ============================================================
-
-  const normalizeStatus = (status) => {
-    if (!status) return "Pending";
-
-    const value = String(status)
-      .trim()
-      .toLowerCase()
-      .replace(/[_-]/g, " ");
-
-    if (
-      value === "pending" ||
-      value === "placed" ||
-      value === "order placed" ||
-      value === "processing"
-    ) {
-      return "Pending";
-    }
-
-    if (
-      value === "confirmed" ||
-      value === "confirm"
-    ) {
-      return "Confirmed";
-    }
-
-    if (
-      value === "packed" ||
-      value === "packing"
-    ) {
-      return "Packed";
-    }
-
-    if (
-      value === "shipped" ||
-      value === "shipping"
-    ) {
-      return "Shipped";
-    }
-
-    if (
-      value === "out for delivery" ||
-      value === "outfordelivery" ||
-      value === "out_for_delivery"
-    ) {
-      return "Out for Delivery";
-    }
-
-    if (
-      value === "delivered" ||
-      value === "complete" ||
-      value === "completed"
-    ) {
-      return "Delivered";
-    }
-
-    if (
-      value === "cancelled" ||
-      value === "canceled"
-    ) {
-      return "Cancelled";
-    }
-
-    return "Pending";
-  };
-
-  // ============================================================
-  // STATUS STEPS
-  // ============================================================
-
-  const statusSteps = [
-    {
-      key: "Pending",
-      label: "Order Placed",
-      icon: FiShoppingBag,
-      dateField: "createdAt",
-    },
-    {
-      key: "Confirmed",
-      label: "Confirmed",
-      icon: FiCheck,
-      dateField: "confirmedAt",
-    },
-    {
-      key: "Packed",
-      label: "Packed",
-      icon: FiPackage,
-      dateField: "packedAt",
-    },
-    {
-      key: "Shipped",
-      label: "Shipped",
-      icon: FiTruck,
-      dateField: "shippedAt",
-    },
-    {
-      key: "Out for Delivery",
-      label: "Out for Delivery",
-      icon: FiTruck,
-      dateField: "outForDeliveryAt",
-    },
-    {
-      key: "Delivered",
-      label: "Delivered",
-      icon: FiCheck,
-      dateField: "deliveredAt",
-    },
-  ];
-
-  // ============================================================
-  // STATUS INDEX
-  // ============================================================
-
-  const getStatusIndex = (status) => {
-    const normalizedStatus = normalizeStatus(status);
-
-    if (normalizedStatus === "Cancelled") {
-      return -1;
-    }
-
-    const index = statusSteps.findIndex(
-      (step) => step.key === normalizedStatus
-    );
-
-    return index === -1 ? 0 : index;
-  };
-
-  // ============================================================
-  // GET STATUS DATE
-  // ============================================================
-
-  const getStepDate = (step, currentOrder) => {
-    if (!currentOrder) return "";
-
-    const possibleDate =
-      currentOrder[step.dateField];
-
-    if (possibleDate) {
-      return formatDate(possibleDate);
-    }
-
-    /*
-      For now, your existing backend mainly gives us
-      createdAt and status.
-
-      So the first step can safely use createdAt.
-      Other steps remain blank until your backend
-      stores separate status timestamps.
-    */
-
-    if (
-      step.key === "Pending" &&
-      currentOrder.createdAt
-    ) {
-      return formatDate(currentOrder.createdAt);
-    }
-
-    return "";
-  };
-
-  // ============================================================
-  // EXPECTED DELIVERY
-  // ============================================================
-
-  const getExpectedDelivery = () => {
-    if (!order) return "";
-
-    if (order.expectedDelivery) {
-      return formatLongDate(order.expectedDelivery);
-    }
-
-    if (order.expectedDeliveryDate) {
-      return formatLongDate(order.expectedDeliveryDate);
-    }
-
-    if (order.deliveryDate) {
-      return formatLongDate(order.deliveryDate);
-    }
-
-    return "";
-  };
-
-  // ============================================================
-  // DELIVERY ADDRESS
-  // ============================================================
-
-  const getDeliveryAddress = () => {
-    if (!order) return [];
-
-    const addressParts = [
-      order.address,
-      order.city,
-      order.state,
-      order.pincode,
-    ].filter(Boolean);
-
-    return addressParts;
-  };
-
-  // ============================================================
-  // COURIER
-  // ============================================================
-
-  const courierName =
-    order?.courierPartner ||
-    order?.courier ||
-    order?.shippingPartner ||
-    "";
-
-  const trackingNumber =
-    order?.trackingNumber ||
-    order?.trackingId ||
-    order?.awbNumber ||
-    "";
-
-  const trackingUrl =
-    order?.trackingUrl ||
-    order?.trackingLink ||
-    "";
-
-  // ============================================================
-  // CURRENT STATUS
-  // ============================================================
-
-  const currentStatus = normalizeStatus(
-    order?.status
-  );
-
-  const currentStatusIndex =
-    getStatusIndex(currentStatus);
-
-  // ============================================================
-  // LOADING
-  // ============================================================
-
-  if (loading) {
-    return (
-      <div className="min-h-[70vh] bg-[#FAF7F0] px-5 py-20">
-        <div className="mx-auto flex max-w-xl flex-col items-center justify-center text-center">
-          <div
-            className="
-              mb-6
-              flex
-              h-14
-              w-14
-              items-center
-              justify-center
-              rounded-full
-              border
-              border-[#C8A15A]
-              bg-[#FFFDF9]
-            "
-          >
-            <FiPackage
-              size={22}
-              className="animate-pulse text-[#5A3026]"
-            />
-          </div>
-
-          <p
-            className="
-              text-[10px]
-              font-medium
-              uppercase
-              tracking-[0.28em]
-              text-[#A98243]
-            "
-          >
-            Finding Your Order
-          </p>
-
-          <p className="mt-3 text-sm text-[#71655B]">
-            Please wait while we find your order.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0]">
-      <div
-        className="
-          mx-auto
-          w-full
-          max-w-[1400px]
-          px-5
-          pb-16
-          pt-8
-          sm:px-8
-          sm:pt-10
-          lg:px-12
-          lg:pt-12
-          xl:px-16
-        "
-      >
-        {/* =====================================================
-            BREADCRUMB
-        ===================================================== */}
 
-        <div className="mb-8 flex items-center gap-2 text-xs text-[#918477]">
+    <main className="min-h-screen bg-[#FFFFFF] text-[#432D24]">
+
+      <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-7 sm:px-7 sm:pt-10 lg:px-10">
+
+        <nav className="mb-8 flex items-center gap-2 text-xs text-[#928477]">
+
           <button
+
             type="button"
+
             onClick={() => navigate("/")}
-            className="transition hover:text-[#5A3026]"
+
+            className="transition hover:text-[#4B1F1B]"
+
           >
+
             Home
+
           </button>
 
           <FiChevronRight size={13} />
 
-          <span className="text-[#5A3026]">
-            Track Order
-          </span>
-        </div>
+          <span className="text-[#4B1F1B]">Track Order</span>
 
-        {/* =====================================================
-            HERO
-        ===================================================== */}
+        </nav>
 
-        <section className="relative overflow-hidden">
-          {/* Decorative left branch */}
-          <div
-            className="
-              pointer-events-none
-              absolute
-              left-0
-              top-4
-              hidden
-              opacity-40
-              lg:block
-            "
-          >
-            <div className="h-28 w-20 rotate-[-20deg] border-l border-[#C8A15A]" />
+        <section className="mx-auto max-w-2xl text-center">
+
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.32em] text-[#A98243]">
+
+            SIRRAHA
+
+          </p>
+
+          <h1 className="font-serif text-4xl font-normal leading-tight text-[#351411] sm:text-5xl">
+
+            Track Your Order
+
+          </h1>
+
+          <div className="mx-auto mt-5 flex items-center justify-center gap-3">
+
+            <span className="h-px w-10 bg-[#D8BD83]" />
+
+            <span className="h-2 w-2 rotate-45 border border-[#C8A15A]" />
+
+            <span className="h-px w-10 bg-[#D8BD83]" />
+
           </div>
 
-          {/* Decorative right branch */}
-          <div
-            className="
-              pointer-events-none
-              absolute
-              right-0
-              top-4
-              hidden
-              opacity-40
-              lg:block
-            "
-          >
-            <div className="h-28 w-20 rotate-[20deg] border-r border-[#C8A15A]" />
-          </div>
+{!order && (
 
-          <div className="relative mx-auto max-w-3xl text-center">
-            <p
-              className="
-                mb-3
-                text-[10px]
-                font-medium
-                uppercase
-                tracking-[0.34em]
-                text-[#A98243]
-              "
-            >
-              Sirraha
-            </p>
+  <div className="flex w-full justify-center">
 
-            <h1
-              className="
-                font-serif
-                text-[38px]
-                font-normal
-                leading-none
-                text-[#43231C]
-                sm:text-[48px]
-                lg:text-[56px]
-              "
-            >
-              Track Your Order
-            </h1>
+    <p className="mt-5 w-full max-w-2xl px-4 text-center text-sm leading-6 text-[#817267]">
 
-            {/* Decorative divider */}
-            <div className="mx-auto mt-5 flex items-center justify-center gap-3">
-              <span className="h-px w-12 bg-[#D8BD83]" />
+      Enter your order details to view the latest delivery status.
 
-              <span className="h-2 w-2 rotate-45 border border-[#C8A15A] bg-[#FAF7F0]" />
+    </p>
 
-              <span className="h-px w-12 bg-[#D8BD83]" />
-            </div>
-
-            <div className="mt-5 flex w-full justify-center">
-      <p
-        className="
-          text-center
-          text-[13px]
-          leading-6
-          text-[#71655B]
-          sm:text-sm
-        "
-      >
-        Enter your order details to see the latest update.
-      </p>
-    </div>
   </div>
+
+)}
+
         </section>
 
-        {/* =====================================================
-            TRACKING SEARCH CARD
-        ===================================================== */}
+        {/* Search form is hidden once an order is found. */}
 
-        <section className="mx-auto mt-10 max-w-[1100px]">
-          <div
-            className="
-              rounded-[18px]
-              border
-              border-[#DED4C4]
-              bg-[#FFFDF9]
-              p-4
-              shadow-[0_12px_40px_rgba(67,35,28,0.06)]
-              sm:p-5
-              lg:p-6
-            "
-          >
-            <form
-              onSubmit={handleTrackOrder}
-              className="
-                grid
-                gap-4
-                lg:grid-cols-[1fr_1fr_auto]
-                lg:items-end
-              "
-            >
-              {/* Order ID */}
+        {!order && (
+
+          <section className="mx-auto mt-9 max-w-4xl rounded-2xl border border-[#E2D8C9] bg-[#FFFFFF] p-5 shadow-[0_12px_36px_rgba(67,35,28,0.05)] sm:p-7">
+
+            <form onSubmit={handleTrackOrder} className="grid gap-4 md:grid-cols-2">
 
               <div>
+
                 <label
+
                   htmlFor="orderId"
-                  className="
-                    mb-2
-                    block
-                    text-[10px]
-                    font-medium
-                    uppercase
-                    tracking-[0.14em]
-                    text-[#71655B]
-                  "
+
+                  className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#78685B]"
+
                 >
-                  Order ID
+
+                  Order ID or order number
+
                 </label>
 
                 <div className="relative">
+
                   <FiPackage
+
                     size={17}
-                    className="
-                      absolute
-                      left-4
-                      top-1/2
-                      -translate-y-1/2
-                      text-[#A98243]
-                    "
+
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A98243]"
+
                   />
 
                   <input
+
                     id="orderId"
+
                     type="text"
+
                     value={orderId}
-                    onChange={(event) =>
-                      setOrderId(event.target.value)
-                    }
-                    placeholder="Enter Order ID"
+
+                    onChange={(event) => setOrderId(event.target.value)}
+
+                    placeholder="Enter your order ID"
+
                     autoComplete="off"
-                    className="
-                      h-14
-                      w-full
-                      rounded-[10px]
-                      border
-                      border-[#DED4C4]
-                      bg-[#FAF7F0]
-                      pl-12
-                      pr-4
-                      text-sm
-                      text-[#3A2A20]
-                      outline-none
-                      transition
-                      placeholder:text-[#918477]
-                      focus:border-[#C8A15A]
-                      focus:bg-[#FFFDF9]
-                    "
+
+                    required
+
+                    className="h-12 w-full rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] pl-11 pr-4 text-sm outline-none transition placeholder:text-[#A99C8D] focus:border-[#A98243] focus:bg-white"
+
                   />
+
                 </div>
 
-                <p className="mt-2 text-[10px] text-[#918477]">
-                  Example: SIR12345678
-                </p>
               </div>
-
-              {/* Email */}
 
               <div>
+
                 <label
+
                   htmlFor="email"
-                  className="
-                    mb-2
-                    block
-                    text-[10px]
-                    font-medium
-                    uppercase
-                    tracking-[0.14em]
-                    text-[#71655B]
-                  "
+
+                  className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#78685B]"
+
                 >
-                  Email Address
+
+                  Email address
+
                 </label>
 
                 <div className="relative">
+
                   <FiCreditCard
+
                     size={17}
-                    className="
-                      absolute
-                      left-4
-                      top-1/2
-                      -translate-y-1/2
-                      text-[#A98243]
-                    "
+
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A98243]"
+
                   />
 
                   <input
+
                     id="email"
+
                     type="email"
+
                     value={email}
-                    onChange={(event) =>
-                      setEmail(event.target.value)
-                    }
-                    placeholder="Enter your email address"
+
+                    onChange={(event) => setEmail(event.target.value)}
+
+                    placeholder="Email used at checkout"
+
                     autoComplete="email"
-                    className="
-                      h-14
-                      w-full
-                      rounded-[10px]
-                      border
-                      border-[#DED4C4]
-                      bg-[#FAF7F0]
-                      pl-12
-                      pr-4
-                      text-sm
-                      text-[#3A2A20]
-                      outline-none
-                      transition
-                      placeholder:text-[#918477]
-                      focus:border-[#C8A15A]
-                      focus:bg-[#FFFDF9]
-                    "
+
+                    required
+
+                    className="h-12 w-full rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] pl-11 pr-4 text-sm outline-none transition placeholder:text-[#A99C8D] focus:border-[#A98243] focus:bg-white"
+
                   />
+
                 </div>
 
-                <p className="mt-2 text-[10px] text-[#918477]">
-                  Use the email used while placing your order.
-                </p>
               </div>
 
-              {/* Button */}
+              <div className="md:col-span-2">
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="
-                  flex
-                  h-14
-                  items-center
-                  justify-center
-                  gap-3
-                  rounded-[10px]
-                  bg-[#5A3026]
-                  px-7
-                  text-[11px]
-                  font-medium
-                  uppercase
-                  tracking-[0.18em]
-                  text-[#FFFDF9]
-                  transition
-                  hover:bg-[#43231C]
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                  lg:min-w-[190px]
-                "
-              >
-                Track Order
+                <button
 
-                <FiArrowRight size={16} />
-              </button>
+                  type="submit"
+
+                  disabled={loading}
+
+className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#8E6738] bg-transparent px-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#69352D] transition hover:bg-[#8E6738] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+
+                >
+
+                  {loading ? (
+
+                    <>
+
+                      <FiRefreshCw className="animate-spin" size={15} />
+
+                      Finding Order
+
+                    </>
+
+                  ) : (
+
+                    <>
+
+                      Track Order <FiArrowRight size={16} />
+
+                    </>
+
+                  )}
+
+                </button>
+
+              </div>
+
             </form>
 
-            {/* Error */}
-
             {error && (
+
               <div
-                className="
-                  mt-5
-                  flex
-                  items-start
-                  gap-3
-                  rounded-[10px]
-                  border
-                  border-[#E7C8C3]
-                  bg-[#FFF5F3]
-                  px-4
-                  py-4
-                  text-sm
-                  text-[#8F3B32]
-                "
+
+                role="alert"
+
+                className="mt-4 flex items-start gap-3 rounded-lg border border-[#E7C8C3] bg-[#FFF5F3] p-4 text-sm text-[#8F3B32]"
+
               >
-                <FiXCircle
-                  size={18}
-                  className="mt-0.5 shrink-0"
-                />
+
+                <FiXCircle className="mt-0.5 shrink-0" size={17} />
 
                 <p>{error}</p>
-              </div>
-            )}
-          </div>
-        </section>
 
-        {/* =====================================================
-            ORDER RESULT
-        ===================================================== */}
+              </div>
+
+            )}
+
+          </section>
+
+        )}
 
         {order && (
-          <section className="mx-auto mt-8 max-w-[1100px]">
-            {/* =================================================
-                ORDER TOP CARD
-            ================================================= */}
 
-            <div
-              className="
-                rounded-[18px]
-                border
-                border-[#DED4C4]
-                bg-[#FFFDF9]
-                p-5
-                shadow-[0_12px_40px_rgba(67,35,28,0.05)]
-                sm:p-7
-                lg:p-8
-              "
-            >
-              <div
-                className="
-                  flex
-                  flex-col
-                  gap-5
-                  lg:flex-row
-                  lg:items-center
-                  lg:justify-between
-                "
-              >
-                {/* Order number */}
+          <section className="mx-auto mt-9 max-w-4xl space-y-5">
 
-                <div>
-                  <p
-                    className="
-                      mb-2
-                      text-[10px]
-                      font-medium
-                      uppercase
-                      tracking-[0.18em]
-                      text-[#A98243]
-                    "
-                  >
-                    Order Details
+            {/* Order summary */}
+
+            <div className="rounded-2xl border border-[#E2D8C9] bg-[#FFFFFF] p-5 shadow-[0_10px_30px_rgba(67,35,28,0.04)] sm:p-7">
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+                <div className="min-w-0">
+
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#A98243]">
+
+                    Order Summary
+
                   </p>
 
-                  <h2
-                    className="
-                      break-all
-                      font-serif
-                      text-[26px]
-                      font-normal
-                      text-[#43231C]
-                      sm:text-[32px]
-                    "
-                  >
-                    #{order._id}
+                  <h2 className="mt-2 break-all font-serif text-2xl text-[#351411] sm:text-3xl">
+
+                    #{order.orderNumber || order._id}
+
                   </h2>
 
                   {order.createdAt && (
-                    <p className="mt-2 text-xs text-[#918477]">
-                      Placed on{" "}
-                      {formatLongDate(
-                        order.createdAt
-                      )}
+
+                    <p className="mt-2 text-xs text-[#928477]">
+
+                      Placed on {formatDate(order.createdAt, true)}
+
                     </p>
+
                   )}
+
                 </div>
 
-                {/* Expected delivery */}
+                <div className="flex flex-wrap items-center gap-3">
 
-                <div className="flex flex-wrap items-center gap-5">
-                  {getExpectedDelivery() && (
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="
-                          flex
-                          h-10
-                          w-10
-                          items-center
-                          justify-center
-                          rounded-full
-                          bg-[#F2EBDD]
-                          text-[#A98243]
-                        "
-                      >
-                        <FiCalendar size={17} />
-                      </div>
+                  <span
 
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.1em] text-[#918477]">
-                          Expected Delivery
-                        </p>
+                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] ${
 
-                        <p className="mt-1 text-sm font-medium text-[#3A2A20]">
-                          {getExpectedDelivery()}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                      isCancelled
 
-                  {/* Status badge */}
+                        ? "bg-[#FFF0EE] text-[#A94438]"
 
-                  <div
-                    className={`
-                      inline-flex
-                      items-center
-                      gap-2
-                      rounded-full
-                      px-4
-                      py-2.5
-                      text-[10px]
-                      font-medium
-                      uppercase
-                      tracking-[0.12em]
-                      ${
-                        currentStatus === "Cancelled"
-                          ? "bg-[#FFF0EE] text-[#A94438]"
-                          : "bg-[#F5E8CE] text-[#795033]"
-                      }
-                    `}
+                        : isDelivered
+
+                          ? "bg-[#E8F2E7] text-[#386641]"
+
+                          : "bg-[#F5E8CE] text-[#69352D]"
+
+                    }`}
+
                   >
-                    {currentStatus ===
-                    "Cancelled" ? (
+
+                    {isCancelled ? (
+
                       <FiXCircle size={14} />
+
+                    ) : isDelivered ? (
+
+                      <FiCheck size={14} />
+
                     ) : (
+
                       <FiTruck size={14} />
+
                     )}
 
-                    {currentStatus === "Pending"
+                    {currentStatus === "PENDING"
+
                       ? "Order Placed"
-                      : currentStatus}
-                  </div>
+
+                      : currentStatus.replace(/_/g, " ")}
+
+                  </span>
+
+                  <button
+
+                    type="button"
+
+                    onClick={handleRefresh}
+
+                    disabled={refreshing}
+
+                    title="Refresh order status"
+
+                    aria-label="Refresh order status"
+
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#E5DDD8] text-[#8E6738] transition hover:bg-[#F5EFE4] disabled:opacity-60"
+
+                  >
+
+                    <FiRefreshCw
+
+                      size={15}
+
+                      className={refreshing ? "animate-spin" : ""}
+
+                    />
+
+                  </button>
+
                 </div>
+
               </div>
+
+              {expectedDelivery && (
+
+                <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#F7F1E7] p-4">
+
+                  <FiTruck className="shrink-0 text-[#A98243]" size={19} />
+
+                  <div>
+
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#928477]">
+
+                      Expected delivery
+
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#351411]">
+
+                      {formatDate(expectedDelivery, true)}
+
+                    </p>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              <p className="mt-4 text-[11px] text-[#928477]">
+
+                {refreshing
+
+                  ? "Checking for updates…"
+
+                  : lastUpdated
+
+                    ? `Last checked at ${lastUpdated.toLocaleTimeString("en-IN", {
+
+                        hour: "2-digit",
+
+                        minute: "2-digit",
+
+                      })}. Updates are checked every 15 seconds.`
+
+                    : "Order status updates automatically."}
+
+              </p>
+
             </div>
 
-            {/* =================================================
-                CANCELLED
-            ================================================= */}
+            {/* Order progress */}
 
-            {currentStatus === "Cancelled" ? (
-              <div
-                className="
-                  mt-5
-                  rounded-[18px]
-                  border
-                  border-[#E7C8C3]
-                  bg-[#FFF5F3]
-                  p-6
-                  sm:p-8
-                "
-              >
+            {isCancelled ? (
+
+              <div className="rounded-2xl border border-[#E7C8C3] bg-[#FFF8F6] p-6 sm:p-7">
+
                 <div className="flex items-start gap-4">
-                  <div
-                    className="
-                      flex
-                      h-11
-                      w-11
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-full
-                      bg-[#FFFDF9]
-                      text-[#A94438]
-                    "
-                  >
-                    <FiXCircle size={20} />
+
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FBE7E3] text-[#A94438]">
+
+                    <FiXCircle size={21} />
+
                   </div>
 
                   <div>
-                    <h3
-                      className="
-                        font-serif
-                        text-xl
-                        text-[#6F2E27]
-                      "
-                    >
-                      This order has been cancelled
+
+                    <h3 className="font-serif text-xl text-[#6F2E27]">
+
+                      Order cancelled
+
                     </h3>
 
-                    <p className="mt-2 text-sm leading-6 text-[#8F3B32]">
-                      If you believe this cancellation
-                      was unexpected, please contact
-                      Sirraha support.
+                    <p className="mt-2 text-sm leading-6 text-[#8F625A]">
+
+                      This order has been cancelled. Please contact Sirraha
+
+                      support if you need help.
+
                     </p>
+
                   </div>
+
                 </div>
+
               </div>
+
             ) : (
-              /* =================================================
-                  STATUS TRACKER
-              ================================================= */
 
-              <div
-                className="
-                  mt-5
-                  rounded-[18px]
-                  border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]
-                  p-5
-                  shadow-[0_12px_40px_rgba(67,35,28,0.05)]
-                  sm:p-7
-                  lg:p-8
-                "
-              >
-                <div className="mb-8">
-                  <p
-                    className="
-                      text-[10px]
-                      font-medium
-                      uppercase
-                      tracking-[0.2em]
-                      text-[#A98243]
-                    "
-                  >
-                    Order Progress
-                  </p>
+              <div className="rounded-2xl border border-[#E2D8C9] bg-[#FFFFFF] p-5 shadow-[0_10px_30px_rgba(67,35,28,0.04)] sm:p-7">
 
-                  <h3
-                    className="
-                      mt-2
-                      font-serif
-                      text-2xl
-                      text-[#43231C]
-                    "
-                  >
-                    Your order journey
-                  </h3>
-                </div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#A98243]">
 
-                {/* DESKTOP TIMELINE */}
+                  Order Progress
 
-                <div className="hidden lg:block">
-                  <div className="relative grid grid-cols-6">
-                    {statusSteps.map(
-                      (step, index) => {
-                        const Icon = step.icon;
-
-                        const completed =
-                          index <=
-                          currentStatusIndex;
-
-                        const active =
-                          index ===
-                          currentStatusIndex;
-
-                        return (
-                          <div
-                            key={step.key}
-                            className="
-                              relative
-                              flex
-                              flex-col
-                              items-center
-                              text-center
-                            "
-                          >
-                            {/* Connector */}
-
-                            {index <
-                              statusSteps.length -
-                                1 && (
-                              <div
-                                className={`
-                                  absolute
-                                  left-1/2
-                                  top-6
-                                  h-px
-                                  w-full
-                                  ${
-                                    index <
-                                    currentStatusIndex
-                                      ? "bg-[#C8A15A]"
-                                      : "border-t border-dashed border-[#D8D0C3]"
-                                  }
-                                `}
-                              />
-                            )}
-
-                            {/* Icon */}
-
-                            <div
-                              className={`
-                                relative
-                                z-10
-                                flex
-                                h-12
-                                w-12
-                                items-center
-                                justify-center
-                                rounded-full
-                                border
-                                ${
-                                  completed
-                                    ? "border-[#C8A15A] bg-[#C8A15A] text-[#FFFDF9]"
-                                    : "border-[#D8D0C3] bg-[#FAF7F0] text-[#AFA59A]"
-                                }
-                                ${
-                                  active
-                                    ? "ring-4 ring-[#F2EBDD]"
-                                    : ""
-                                }
-                              `}
-                            >
-                              <Icon size={18} />
-                            </div>
-
-                            {/* Label */}
-
-                            <p
-                              className={`
-                                mt-4
-                                max-w-[120px]
-                                text-[10px]
-                                font-medium
-                                uppercase
-                                tracking-[0.08em]
-                                sm:text-[11px]
-                                ${
-                                  completed
-                                    ? "text-[#5A3026]"
-                                    : "text-[#AFA59A]"
-                                }
-                              `}
-                            >
-                              {step.label}
-                            </p>
-
-                            {/* Date */}
-
-                            <p className="mt-1 text-[10px] text-[#918477]">
-                              {getStepDate(
-                                step,
-                                order
-                              )}
-                            </p>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-
-                {/* MOBILE TIMELINE */}
-
-                <div className="lg:hidden">
-                  <div className="space-y-0">
-                    {statusSteps.map(
-                      (step, index) => {
-                        const Icon = step.icon;
-
-                        const completed =
-                          index <=
-                          currentStatusIndex;
-
-                        const active =
-                          index ===
-                          currentStatusIndex;
-
-                        const isLast =
-                          index ===
-                          statusSteps.length - 1;
-
-                        return (
-                          <div
-                            key={step.key}
-                            className="relative flex gap-4"
-                          >
-                            {/* Vertical connector */}
-
-                            {!isLast && (
-                              <div
-                                className={`
-                                  absolute
-                                  left-[19px]
-                                  top-10
-                                  h-[calc(100%-16px)]
-                                  w-px
-                                  ${
-                                    index <
-                                    currentStatusIndex
-                                      ? "bg-[#C8A15A]"
-                                      : "border-l border-dashed border-[#D8D0C3]"
-                                  }
-                                `}
-                              />
-                            )}
-
-                            {/* Icon */}
-
-                            <div
-                              className={`
-                                relative
-                                z-10
-                                flex
-                                h-10
-                                w-10
-                                shrink-0
-                                items-center
-                                justify-center
-                                rounded-full
-                                border
-                                ${
-                                  completed
-                                    ? "border-[#C8A15A] bg-[#C8A15A] text-[#FFFDF9]"
-                                    : "border-[#D8D0C3] bg-[#FAF7F0] text-[#AFA59A]"
-                                }
-                                ${
-                                  active
-                                    ? "ring-4 ring-[#F2EBDD]"
-                                    : ""
-                                }
-                              `}
-                            >
-                              <Icon size={16} />
-                            </div>
-
-                            {/* Content */}
-
-                            <div
-                              className={`
-                                min-w-0
-                                flex-1
-                                ${
-                                  isLast
-                                    ? "pb-0"
-                                    : "pb-7"
-                                }
-                              `}
-                            >
-                              <p
-                                className={`
-                                  text-sm
-                                  font-medium
-                                  ${
-                                    completed
-                                      ? "text-[#5A3026]"
-                                      : "text-[#AFA59A]"
-                                  }
-                                `}
-                              >
-                                {step.label}
-                              </p>
-
-                              <p className="mt-1 text-xs text-[#918477]">
-                                {getStepDate(
-                                  step,
-                                  order
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =================================================
-                INFORMATION GRID
-            ================================================= */}
-
-            <div
-              className="
-                mt-5
-                grid
-                gap-5
-                lg:grid-cols-[1.05fr_0.95fr]
-              "
-            >
-              {/* =================================================
-                  ORDER ITEMS
-              ================================================= */}
-
-              <div
-                className="
-                  rounded-[18px]
-                  border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]
-                  p-5
-                  shadow-[0_12px_40px_rgba(67,35,28,0.04)]
-                  sm:p-7
-                "
-              >
-                <div
-                  className="
-                    mb-5
-                    flex
-                    items-center
-                    justify-between
-                    border-b
-                    border-[#EAE2D5]
-                    pb-5
-                  "
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="
-                        flex
-                        h-9
-                        w-9
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-[#F2EBDD]
-                        text-[#A98243]
-                      "
-                    >
-                      <FiShoppingBag size={16} />
-                    </div>
-
-                    <h3
-                      className="
-                        font-serif
-                        text-xl
-                        text-[#43231C]
-                      "
-                    >
-                      Order Items
-                    </h3>
-                  </div>
-
-                  <span className="text-xs text-[#918477]">
-                    {order.items?.length || 0}{" "}
-                    {(order.items?.length || 0) === 1
-                      ? "item"
-                      : "items"}
-                  </span>
-                </div>
-
-                <div className="divide-y divide-[#EAE2D5]">
-                  {order.items?.map(
-                    (item, index) => (
-                      <div
-                        key={`${item.productCode || item.product || "item"}-${index}`}
-                        className="
-                          flex
-                          gap-4
-                          py-5
-                          first:pt-0
-                          last:pb-0
-                        "
-                      >
-                        {/* Image */}
-
-                        <div
-                          className="
-                            h-24
-                            w-20
-                            shrink-0
-                            overflow-hidden
-                            rounded-[8px]
-                            bg-[#F2EBDD]
-                            sm:h-28
-                            sm:w-24
-                          "
-                        >
-                          {item.image ? (
-                            <img
-                              src={item.image}
-                              alt={
-                                item.name ||
-                                "Sirraha product"
-                              }
-                              className="
-                                h-full
-                                w-full
-                                object-cover
-                              "
-                            />
-                          ) : (
-                            <div
-                              className="
-                                flex
-                                h-full
-                                w-full
-                                items-center
-                                justify-center
-                                text-[#A98243]
-                              "
-                            >
-                              <FiPackage
-                                size={22}
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Information */}
-
-                        <div className="min-w-0 flex-1">
-                          <div
-                            className="
-                              flex
-                              flex-col
-                              gap-2
-                              sm:flex-row
-                              sm:items-start
-                              sm:justify-between
-                            "
-                          >
-                            <div>
-                              <h4
-                                className="
-                                  text-sm
-                                  font-medium
-                                  text-[#3A2A20]
-                                "
-                              >
-                                {item.name ||
-                                  "Sirraha Product"}
-                              </h4>
-
-                              {item.productCode && (
-                                <p className="mt-1 text-[10px] text-[#AFA59A]">
-                                  Product Code:{" "}
-                                  {item.productCode}
-                                </p>
-                              )}
-                            </div>
-
-                            <p
-                              className="
-                                shrink-0
-                                font-serif
-                                text-lg
-                                text-[#5A3026]
-                              "
-                            >
-                              ₹
-                              {formatPrice(
-                                item.price
-                              )}
-                            </p>
-                          </div>
-
-                          <div
-                            className="
-                              mt-3
-                              flex
-                              flex-wrap
-                              gap-x-5
-                              gap-y-1
-                              text-[11px]
-                              text-[#918477]
-                            "
-                          >
-                            <span>
-                              Size:{" "}
-                              {item.size || "—"}
-                            </span>
-
-                            <span>
-                              Qty:{" "}
-                              {item.quantity || 0}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* =================================================
-                  DELIVERY DETAILS
-              ================================================= */}
-
-              <div
-                className="
-                  rounded-[18px]
-                  border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]
-                  p-5
-                  shadow-[0_12px_40px_rgba(67,35,28,0.04)]
-                  sm:p-7
-                "
-              >
-                <div className="mb-5 flex items-center gap-3">
-                  <div
-                    className="
-                      flex
-                      h-9
-                      w-9
-                      items-center
-                      justify-center
-                      rounded-full
-                      bg-[#F2EBDD]
-                      text-[#A98243]
-                    "
-                  >
-                    <FiMapPin size={17} />
-                  </div>
-
-                  <h3
-                    className="
-                      font-serif
-                      text-xl
-                      text-[#43231C]
-                    "
-                  >
-                    Delivery Details
-                  </h3>
-                </div>
-
-                {/* Address */}
-
-                <div className="flex items-start gap-4">
-                  <FiMapPin
-                    size={18}
-                    className="mt-1 shrink-0 text-[#A98243]"
-                  />
-
-                  <div className="min-w-0">
-                    <p
-                      className="
-                        text-[10px]
-                        font-medium
-                        uppercase
-                        tracking-[0.12em]
-                        text-[#918477]
-                      "
-                    >
-                      Delivery Address
-                    </p>
-
-                    <div className="mt-2 space-y-1 text-sm leading-6 text-[#3A2A20]">
-                      {order.customerName && (
-                        <p className="font-medium">
-                          {order.customerName}
-                        </p>
-                      )}
-
-                      {getDeliveryAddress().map(
-                        (part, index) => (
-                          <p key={`${part}-${index}`}>
-                            {part}
-                          </p>
-                        )
-                      )}
-
-                      {order.phone && (
-                        <p className="pt-1 text-[#71655B]">
-                          {order.phone}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Divider */}
-
-                <div className="my-6 border-t border-[#EAE2D5]" />
-
-                {/* Courier */}
-
-                <div className="flex items-start gap-4">
-                  <FiTruck
-                    size={18}
-                    className="mt-1 shrink-0 text-[#A98243]"
-                  />
-
-                  <div className="min-w-0">
-                    <p
-                      className="
-                        text-[10px]
-                        font-medium
-                        uppercase
-                        tracking-[0.12em]
-                        text-[#918477]
-                      "
-                    >
-                      Courier Partner
-                    </p>
-
-                    <p className="mt-2 text-sm text-[#3A2A20]">
-                      {courierName || "Not assigned yet"}
-                    </p>
-
-                    {trackingNumber && (
-                      <>
-                        <p
-                          className="
-                            mt-5
-                            text-[10px]
-                            font-medium
-                            uppercase
-                            tracking-[0.12em]
-                            text-[#918477]
-                          "
-                        >
-                          Tracking Number
-                        </p>
-
-                        <p className="mt-2 break-all text-sm font-medium text-[#5A3026]">
-                          {trackingNumber}
-                        </p>
-                      </>
-                    )}
-
-                    {trackingUrl && (
-                      <a
-                        href={trackingUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="
-                          mt-3
-                          inline-flex
-                          items-center
-                          gap-2
-                          text-xs
-                          font-medium
-                          text-[#A98243]
-                          underline-offset-4
-                          hover:underline
-                        "
-                      >
-                        Track Shipment
-                        <FiExternalLink
-                          size={13}
-                        />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* =================================================
-                PAYMENT DETAILS
-            ================================================= */}
-
-            <div
-              className="
-                mt-5
-                rounded-[18px]
-                border
-                border-[#DED4C4]
-                bg-[#FFFDF9]
-                p-5
-                shadow-[0_12px_40px_rgba(67,35,28,0.04)]
-                sm:p-7
-              "
-            >
-              <div className="mb-6 flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-9
-                    w-9
-                    items-center
-                    justify-center
-                    rounded-full
-                    bg-[#F2EBDD]
-                    text-[#A98243]
-                  "
-                >
-                  <FiCreditCard size={17} />
-                </div>
-
-                <h3
-                  className="
-                    font-serif
-                    text-xl
-                    text-[#43231C]
-                  "
-                >
-                  Payment Details
-                </h3>
-              </div>
-
-              <div
-                className="
-                  grid
-                  gap-6
-                  md:grid-cols-[1fr_1fr]
-                "
-              >
-                {/* Payment method */}
-
-                <div className="md:border-r md:border-[#EAE2D5] md:pr-8">
-                  <p
-                    className="
-                      text-[10px]
-                      uppercase
-                      tracking-[0.12em]
-                      text-[#918477]
-                    "
-                  >
-                    Payment Method
-                  </p>
-
-                  <p className="mt-2 text-sm font-medium text-[#3A2A20]">
-                    {order.paymentMethod ||
-                      "Cash on Delivery"}
-                  </p>
-
-                  <p
-                    className={`
-                      mt-3
-                      inline-flex
-                      rounded-full
-                      px-3
-                      py-1.5
-                      text-[10px]
-                      font-medium
-                      uppercase
-                      tracking-[0.1em]
-                      ${
-                        String(
-                          order.paymentStatus || ""
-                        ).toLowerCase() === "paid"
-                          ? "bg-[#F5E8CE] text-[#795033]"
-                          : "bg-[#F2EBDD] text-[#71655B]"
-                      }
-                    `}
-                  >
-                    {order.paymentStatus ||
-                      "Pending"}
-                  </p>
-                </div>
-
-                {/* Price summary */}
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm text-[#71655B]">
-                    <span>Subtotal</span>
-
-                    <span>
-                      ₹
-                      {formatPrice(
-                        order.subtotal
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-[#71655B]">
-                    <span>Shipping Charges</span>
-
-                    <span>
-                      {Number(
-                        order.shipping || 0
-                      ) === 0
-                        ? "Free"
-                        : `₹${formatPrice(
-                            order.shipping
-                          )}`}
-                    </span>
-                  </div>
-
-                  {Number(
-                    order.discount || 0
-                  ) > 0 && (
-                    <div className="flex items-center justify-between text-sm text-[#795033]">
-                      <span>Discount</span>
-
-                      <span>
-                        -₹
-                        {formatPrice(
-                          order.discount
-                        )}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="border-t border-[#EAE2D5] pt-4">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="
-                          text-[11px]
-                          font-medium
-                          uppercase
-                          tracking-[0.12em]
-                          text-[#3A2A20]
-                        "
-                      >
-                        Total Paid
-                      </span>
-
-                      <span
-                        className="
-                          font-serif
-                          text-2xl
-                          text-[#5A3026]
-                        "
-                      >
-                        ₹
-                        {formatPrice(
-                          order.total
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* =================================================
-                CUSTOMER INFORMATION
-            ================================================= */}
-
-            {(order.email ||
-              order.phone ||
-              order.customerName) && (
-              <div
-                className="
-                  mt-5
-                  rounded-[18px]
-                  border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]
-                  p-5
-                  shadow-[0_12px_40px_rgba(67,35,28,0.04)]
-                  sm:p-7
-                "
-              >
-                <p
-                  className="
-                    mb-5
-                    text-[10px]
-                    font-medium
-                    uppercase
-                    tracking-[0.2em]
-                    text-[#A98243]
-                  "
-                >
-                  Customer Information
                 </p>
 
-                <div className="grid gap-5 sm:grid-cols-3">
-                  {order.customerName && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-[#918477]">
-                        Name
-                      </p>
+                <h3 className="mt-2 font-serif text-2xl text-[#351411]">
 
-                      <p className="mt-2 text-sm text-[#3A2A20]">
-                        {order.customerName}
-                      </p>
+                  {isDelivered ? "Your order has arrived" : "Your order journey"}
+
+                </h3>
+
+                <div className="relative mt-8 hidden sm:block">
+
+                  <div className="absolute left-[10%] right-[10%] top-5 h-px bg-[#E5DCCE]" />
+
+                  <div
+
+                    className="absolute left-[10%] top-5 h-px bg-[#A98243] transition-all duration-500"
+
+                    style={{
+
+                      width:
+
+                        currentStatusIndex > 0
+
+                          ? `${(currentStatusIndex / 4) * 80}%`
+
+                          : "0%",
+
+                    }}
+
+                  />
+
+                  <div className="relative grid grid-cols-5 gap-2">
+
+                    {STATUS_STEPS.map((step, index) => {
+
+                      const StepIcon = step.icon;
+
+                      const completed =
+
+                        currentStatusIndex >= 0 && index <= currentStatusIndex;
+
+                      const active = index === currentStatusIndex;
+
+                      return (
+
+                        <div
+
+                          key={step.key}
+
+                          className="flex min-w-0 flex-col items-center text-center"
+
+                        >
+
+                          <div
+
+                            className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border ${
+
+                              completed
+
+                                ? "border-[#8E6738] bg-[#8E6738] text-white"
+
+                                : "border-[#E1D8CA] bg-[#FFFFFF] text-[#B8AA97]"
+
+                            } ${active ? "ring-4 ring-[#F3E8D6]" : ""}`}
+
+                          >
+
+                            <StepIcon size={16} />
+
+                          </div>
+
+                          <p
+
+                            className={`mt-3 text-[11px] font-medium ${
+
+                              completed ? "text-[#351411]" : "text-[#A99C8D]"
+
+                            }`}
+
+                          >
+
+                            {step.label}
+
+                          </p>
+
+                          {active && (
+
+                            <span className="mt-1 text-[9px] uppercase tracking-wider text-[#A98243]">
+
+                              Current
+
+                            </span>
+
+                          )}
+
+                        </div>
+
+                      );
+
+                    })}
+
+                  </div>
+
+                </div>
+
+                <div className="mt-7 space-y-0 sm:hidden">
+
+                  {STATUS_STEPS.map((step, index) => {
+
+                    const StepIcon = step.icon;
+
+                    const completed =
+
+                      currentStatusIndex >= 0 && index <= currentStatusIndex;
+
+                    const active = index === currentStatusIndex;
+
+                    const last = index === STATUS_STEPS.length - 1;
+
+                    return (
+
+                      <div key={step.key} className="flex gap-3">
+
+                        <div className="flex w-9 shrink-0 flex-col items-center">
+
+                          <div
+
+                            className={`z-10 flex h-9 w-9 items-center justify-center rounded-full border ${
+
+                              completed
+
+                                ? "border-[#8E6738] bg-[#8E6738] text-white"
+
+                                : "border-[#E1D8CA] bg-[#FFFFFF] text-[#B8AA97]"
+
+                            } ${active ? "ring-4 ring-[#F3E8D6]" : ""}`}
+
+                          >
+
+                            <StepIcon size={15} />
+
+                          </div>
+
+                          {!last && (
+
+                            <div
+
+                              className={`my-1 min-h-7 w-px ${
+
+                                index < currentStatusIndex
+
+                                  ? "bg-[#A98243]"
+
+                                  : "bg-[#E5DCCE]"
+
+                              }`}
+
+                            />
+
+                          )}
+
+                        </div>
+
+                        <div className={last ? "pb-0 pt-1" : "pb-5 pt-1"}>
+
+                          <p
+
+                            className={`text-sm font-medium ${
+
+                              completed ? "text-[#351411]" : "text-[#A99C8D]"
+
+                            }`}
+
+                          >
+
+                            {step.label}
+
+                          </p>
+
+                          {active && (
+
+                            <p className="mt-1 text-xs text-[#A98243]">
+
+                              Current status
+
+                            </p>
+
+                          )}
+
+                        </div>
+
+                      </div>
+
+                    );
+
+                  })}
+
+                </div>
+
+                <p className="mt-7 rounded-lg bg-[#F7F1E7] p-3 text-xs leading-5 text-[#817267]">
+
+                  Your progress changes when the Sirraha team updates your
+
+                  order status.
+
+                </p>
+
+              </div>
+
+            )}
+
+            {/* Order items */}
+
+            <div className="rounded-2xl border border-[#E2D8C9] bg-[#FFFFFF] p-5 shadow-[0_10px_30px_rgba(67,35,28,0.04)] sm:p-7">
+
+              <div className="mb-5 flex items-center justify-between border-b border-[#EEE6DA] pb-4">
+
+                <h3 className="font-serif text-xl text-[#351411]">Order Items</h3>
+
+                <span className="text-xs text-[#928477]">
+
+                  {order.items?.length || 0}{" "}
+
+                  {(order.items?.length || 0) === 1 ? "item" : "items"}
+
+                </span>
+
+              </div>
+
+              <div className="divide-y divide-[#EEE6DA]">
+
+                {(order.items || []).map((item, index) => {
+
+                  const name = getProductName(item);
+
+                  const image = getProductImage(item);
+
+                  const quantity = Number(item.quantity || 1);
+
+                  const price = Number(
+
+                    item.salePrice ??
+
+                      item.price ??
+
+                      item.product?.salePrice ??
+
+                      item.product?.price ??
+
+                      0
+
+                  );
+
+                  const size = item.size || item.selectedSize;
+
+                  return (
+
+                    <div
+
+                      key={item._id || item.product?._id || `${name}-${index}`}
+
+                      className="flex gap-4 py-4 first:pt-0 last:pb-0"
+
+                    >
+
+                      <div className="flex h-24 w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#F3EDE3] sm:h-28 sm:w-[88px]">
+
+                        {image ? (
+
+                          <img
+
+                            src={image}
+
+                            alt={name}
+
+                            loading="lazy"
+
+                            className="h-full w-full object-cover"
+
+                          />
+
+                        ) : (
+
+                          <FiShoppingBag size={22} className="text-[#B8A58C]" />
+
+                        )}
+
+                      </div>
+
+                      <div className="flex min-w-0 flex-1 flex-col justify-center">
+
+                        <h4 className="text-sm font-medium text-[#351411]">{name}</h4>
+
+                        {size && (
+
+                          <p className="mt-1 text-xs text-[#928477]">
+
+                            Size: {size}
+
+                          </p>
+
+                        )}
+
+                        <p className="mt-1 text-xs text-[#928477]">
+
+                          Qty: {quantity}
+
+                        </p>
+
+                        <p className="mt-2 text-sm font-semibold text-[#69352D]">
+
+                          ₹{formatPrice(price * quantity)}
+
+                        </p>
+
+                        {isDelivered && (
+
+                          <button
+
+                            type="button"
+
+                            onClick={() => {
+                              if (isExchangeEligible) {
+                                setExchangeExpired(false);
+                                setExchangeItem(item);
+                              } else {
+                                setExchangeItem(null);
+                                setExchangeExpired(true);
+                              }
+                            }}
+
+                            className="mt-3 w-fit rounded-md border border-[#8E6738] px-3 py-2 text-xs font-medium text-[#69352D] transition hover:bg-[#F7F1E7]"
+
+                          >
+
+                            Request Exchange
+
+                          </button>
+
+                        )}
+
+                      </div>
+
                     </div>
-                  )}
 
-                  {order.email && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-[#918477]">
-                        Email
-                      </p>
+                  );
 
-                      <p className="mt-2 break-all text-sm text-[#3A2A20]">
-                        {order.email}
-                      </p>
-                    </div>
-                  )}
+                })}
 
-                  {order.phone && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-[#918477]">
-                        Phone
-                      </p>
+                {!order.items?.length && (
 
-                      <p className="mt-2 text-sm text-[#3A2A20]">
-                        {order.phone}
-                      </p>
-                    </div>
-                  )}
+                  <p className="py-3 text-sm text-[#928477]">
+
+                    Item details are not available.
+
+                  </p>
+
+                )}
+
+              </div>
+
+            </div>
+
+            {exchangeItem && (
+
+              <div className="rounded-xl border border-[#E2D8C9] bg-[#F7F1E7] p-4">
+
+                <div className="flex items-start justify-between gap-3">
+
+                  <div>
+
+                    <p className="text-sm font-semibold text-[#351411]">
+
+                      Exchange selected: {getProductName(exchangeItem)}
+
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-[#817267]">
+
+                      Your item is selected. We will add the exchange request form here next.
+
+                    </p>
+
+                  </div>
+
+                  <button
+
+                    type="button"
+
+                    onClick={() => setExchangeItem(null)}
+
+                    className="text-xs font-medium text-[#69352D] underline"
+
+                  >
+
+                    Close
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            )}
+
+{exchangeExpired && (
+              <div
+                role="alert"
+                className="rounded-xl border border-[#D8B8A8] bg-[#FDF5F1] p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 className="font-semibold text-[#69352D]">
+                      Exchange Window Expired
+                    </h4>
+                    <p className="mt-2 text-sm leading-6 text-[#6B5147]">
+                      Sorry, we're unable to exchange this item because the
+                      7-day exchange period has expired.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setExchangeExpired(false)}
+                    className="shrink-0 text-xs font-medium text-[#69352D] underline"
+                    aria-label="Close exchange window expired message"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* =================================================
-                ACTIONS
-            ================================================= */}
+            {/* Delivery and payment */}
 
-            <div
-              className="
-                flex
-                flex-col
-                items-stretch
-                justify-center
-                gap-3
-                pb-8
-                pt-7
-                sm:flex-row
-                sm:items-center
-              "
-            >
-              <button
-                type="button"
-                onClick={handleTrackAnother}
-                className="
-                  inline-flex
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-[10px]
-                  border
-                  border-[#5A3026]
-                  px-6
-                  py-3.5
-                  text-[10px]
-                  font-medium
-                  uppercase
-                  tracking-[0.16em]
-                  text-[#5A3026]
-                  transition
-                  hover:bg-[#5A3026]
-                  hover:text-[#FFFDF9]
-                "
-              >
-                Track Another Order
-              </button>
+            <div className="grid gap-5 md:grid-cols-2">
 
-              <button
-                type="button"
-                onClick={() =>
-                  navigate("/collection")
-                }
-                className="
-                  inline-flex
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-[10px]
-                  bg-[#5A3026]
-                  px-6
-                  py-3.5
-                  text-[10px]
-                  font-medium
-                  uppercase
-                  tracking-[0.16em]
-                  text-[#FFFDF9]
-                  transition
-                  hover:bg-[#43231C]
-                "
-              >
-                Continue Shopping
-                <FiArrowRight size={15} />
-              </button>
+              <div className="rounded-2xl border border-[#E2D8C9] bg-[#FFFFFF] p-5 sm:p-6">
+
+                <div className="mb-5 flex items-center gap-3">
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F5EFE4] text-[#8E6738]">
+
+                    <FiMapPin size={18} />
+
+                  </div>
+
+                  <h3 className="font-serif text-xl text-[#351411]">
+
+                    Delivery Details
+
+                  </h3>
+
+                </div>
+
+                <div className="space-y-4 text-sm">
+
+                  <div>
+
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#928477]">
+
+                      Deliver to
+
+                    </p>
+
+                    <p className="mt-1 font-medium text-[#351411]">
+
+                      {order.customerName || "Customer"}
+
+                    </p>
+
+                    {deliveryAddress && (
+
+                      <p className="mt-1 leading-6 text-[#817267]">
+
+                        {deliveryAddress}
+
+                      </p>
+
+                    )}
+
+                    {order.phone && (
+
+                      <p className="mt-2 text-[#817267]">{order.phone}</p>
+
+                    )}
+
+                  </div>
+
+                  <div className="border-t border-[#EEE6DA] pt-4">
+
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#928477]">
+
+                      Courier Partner
+
+                    </p>
+
+                    <p className="mt-1 text-[#351411]">
+
+                      {courierName || "Not assigned yet"}
+
+                    </p>
+
+                  </div>
+
+                  {trackingNumber && (
+
+                    <div>
+
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#928477]">
+
+                        Tracking Number
+
+                      </p>
+
+                      <p className="mt-1 break-all font-medium text-[#351411]">
+
+                        {trackingNumber}
+
+                      </p>
+
+                      {trackingUrl && (
+
+                        <a
+
+                          href={trackingUrl}
+
+                          target="_blank"
+
+                          rel="noreferrer"
+
+                          className="mt-2 inline-flex items-center gap-2 text-xs font-medium text-[#8E6738] underline underline-offset-4"
+
+                        >
+
+                          Track shipment <FiTruck size={13} />
+
+                        </a>
+
+                      )}
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              </div>
+
+              <div className="rounded-2xl border border-[#E2D8C9] bg-[#FFFFFF] p-5 sm:p-6">
+
+                <div className="mb-5 flex items-center gap-3">
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F5EFE4] text-[#8E6738]">
+
+                    <FiCreditCard size={18} />
+
+                  </div>
+
+                  <h3 className="font-serif text-xl text-[#351411]">
+
+                    Payment Summary
+
+                  </h3>
+
+                </div>
+
+                <div className="space-y-4 text-sm">
+
+                  <div className="flex items-start justify-between gap-3">
+
+                    <span className="text-[#928477]">Payment method</span>
+
+                    <span className="text-right font-medium text-[#351411]">
+
+                      {getPaymentMethod(order.paymentMethod)}
+
+                    </span>
+
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+
+                    <span className="text-[#928477]">Payment status</span>
+
+                    <span className="rounded-full bg-[#F5E8CE] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#69352D]">
+
+                      {String(order.paymentStatus || "PENDING").toUpperCase()}
+
+                    </span>
+
+                  </div>
+
+                  <div className="border-t border-dashed border-[#E5DCCE]" />
+
+                  <div className="flex items-center justify-between gap-3">
+
+                    <span className="text-[#928477]">Subtotal</span>
+
+                    <span className="text-[#351411]">
+
+                      ₹{formatPrice(order.subtotal ?? order.total ?? 0)}
+
+                    </span>
+
+                  </div>
+
+                  {Number(order.discount || 0) > 0 && (
+
+                    <div className="flex items-center justify-between gap-3">
+
+                      <span className="text-[#928477]">Discount</span>
+
+                      <span className="text-[#386641]">
+
+                        −₹{formatPrice(order.discount)}
+
+                      </span>
+
+                    </div>
+
+                  )}
+
+                  <div className="flex items-center justify-between gap-3">
+
+                    <span className="text-[#928477]">Shipping</span>
+
+                    <span className="text-[#351411]">
+
+                      {Number(order.shipping || 0) === 0
+
+                        ? "Free"
+
+                        : `₹${formatPrice(order.shipping)}`}
+
+                    </span>
+
+                  </div>
+
+                  <div className="border-t border-[#E5DDD8]" />
+
+                  <div className="flex items-center justify-between gap-3">
+
+                    <span className="font-semibold text-[#351411]">Total</span>
+
+                    <span className="font-serif text-2xl text-[#69352D]">
+
+                      ₹{formatPrice(order.total ?? order.totalAmount ?? 0)}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
+
+            {/* Footer actions */}
+
+            <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-[#E2D8C9] bg-[#F5EFE4] p-5 sm:flex-row sm:items-center sm:p-6">
+
+              <div>
+
+                <h3 className="font-serif text-xl text-[#351411]">Need help?</h3>
+
+                <p className="mt-1 text-sm leading-6 text-[#817267]">
+
+                  Contact Sirraha support if you have a question about your order.
+
+                </p>
+
+              </div>
+
+              <button
+
+                type="button"
+
+                onClick={handleTrackAnother}
+
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#8E6738] px-5 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-[#69352D] transition hover:bg-[#8E6738] hover:text-white sm:w-auto"
+
+              >
+
+                <FiArrowLeft size={15} />
+
+                Track Another Order
+
+              </button>
+
+            </div>
+
           </section>
+
         )}
+
+        <footer className="mt-12 border-t border-[#E5DCCE] pt-6 text-center">
+
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#A99C8D]">
+
+            SIRRAHA · Made with care
+
+          </p>
+
+        </footer>
+
       </div>
-    </div>
+
+    </main>
+
   );
+
 }
 
 export default TrackOrder;

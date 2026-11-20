@@ -98,8 +98,8 @@ function Collection() {
       className="
         min-h-screen
         w-full
-        bg-[#FAF7F0]
-        text-[#3A2A20]
+        bg-[#FFFFFF]
+        text-[#351C19]
       "
     >
       <div
@@ -131,7 +131,7 @@ function Collection() {
               tracking-[2px]
               text-[#A98243]
               transition-colors
-              hover:text-[#5A3026]
+              hover:text-[#4B1F1B]
             "
           >
             <ArrowLeft
@@ -187,7 +187,7 @@ function Collection() {
                   text-[50px]
                   font-normal
                   leading-none
-                  text-[#43231C]
+                  text-[#351411]
                   sm:text-[62px]
                 "
               >
@@ -210,7 +210,7 @@ function Collection() {
                   font-['Cormorant_Garamond']
                   text-[17px]
                   italic
-                  text-[#71655B]
+                  text-[#6B5651]
                 "
               >
                 {pageDescription}
@@ -268,8 +268,8 @@ function Collection() {
                     className="
                       border-x
                       border-b
-                      border-[#DED4C4]
-                      bg-[#FFFDF9]
+                      border-[#E5DDD8]
+                      bg-[#FFFFFF]
                       p-5
                     "
                   >
@@ -313,8 +313,8 @@ function Collection() {
           <div
             className="
               border-y
-              border-[#DED4C4]
-              bg-[#FFFDF9]
+              border-[#E5DDD8]
+              bg-[#FFFFFF]
               px-6
               py-20
               text-center
@@ -324,7 +324,7 @@ function Collection() {
               className="
                 font-['Cormorant_Garamond']
                 text-[30px]
-                text-[#43231C]
+                text-[#351411]
               "
             >
               Nothing here yet.
@@ -335,7 +335,7 @@ function Collection() {
                 mt-3
                 font-['Poppins']
                 text-[11px]
-                text-[#71655B]
+                text-[#6B5651]
               "
             >
               New pieces will be added soon.

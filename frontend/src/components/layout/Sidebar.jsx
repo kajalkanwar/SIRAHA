@@ -137,7 +137,7 @@ function Sidebar({
         className={`
           fixed
           inset-0
-          z-[200]
+          z-[310]
           bg-[#241A15]/20
           backdrop-blur-[5px]
           transition-all
@@ -161,15 +161,15 @@ function Sidebar({
           fixed
           left-0
           top-0
-          z-[210]
+          z-[320]
           flex
           h-full
           w-[88%]
           max-w-[390px]
           flex-col
           border-r
-          border-[#FFFDF9]/30
-          bg-[#FAF7F0]/85
+          border-[#FFFFFF]/30
+          bg-[#FFFFFF]/85
           shadow-[10px_0_50px_rgba(67,35,28,0.14)]
           backdrop-blur-2xl
           transition-transform
@@ -195,7 +195,7 @@ function Sidebar({
             items-center
             justify-between
             border-b
-            border-[#DED4C4]
+            border-[#E5DDD8]
             px-5
             sm:h-[74px]
             sm:px-7
@@ -217,7 +217,7 @@ function Sidebar({
               font-medium
               leading-none
               tracking-[0.24em]
-              text-[#5A3026]
+              text-[#4B1F1B]
               sm:text-[28px]
               sm:tracking-[0.27em]
             "
@@ -239,13 +239,13 @@ function Sidebar({
               justify-center
               rounded-full
               border
-              border-[#DED4C4]
-              bg-[#FFFDF9]/60
-              text-[#43231C]
+              border-[#E5DDD8]
+              bg-[#FFFFFF]/60
+              text-[#351411]
               transition-all
               duration-300
               hover:border-[#C8A15A]
-              hover:bg-[#F2EBDD]
+              hover:bg-[#FFFFFF]
             "
           >
             <FiX
@@ -322,7 +322,7 @@ function Sidebar({
                   items-center
                   justify-between
                   border-b
-                  border-[#DED4C4]/80
+                  border-[#E5DDD8]/80
                   px-1
                   py-3.5
                   text-left
@@ -337,7 +337,7 @@ function Sidebar({
                     font-['Cormorant_Garamond']
                     text-[20px]
                     leading-none
-                    text-[#43231C]
+                    text-[#351411]
                     transition-colors
                     duration-300
                     group-hover:text-[#A98243]
@@ -375,7 +375,7 @@ function Sidebar({
                 items-center
                 justify-between
                 border-b
-                border-[#DED4C4]
+                border-[#E5DDD8]
                 px-1
                 py-3.5
                 text-left
@@ -388,7 +388,7 @@ function Sidebar({
                   font-['Cormorant_Garamond']
                   text-[20px]
                   leading-none
-                  text-[#43231C]
+                  text-[#351411]
                   sm:text-[21px]
                 "
               >
@@ -432,8 +432,8 @@ function Sidebar({
                 className="
                   rounded-xl
                   border
-                  border-[#DED4C4]/70
-                  bg-[#FFFDF9]/55
+                  border-[#E5DDD8]/70
+                  bg-[#FFFFFF]/55
                   p-2
                   backdrop-blur-xl
                 "
@@ -455,7 +455,7 @@ function Sidebar({
                         items-center
                         justify-between
                         border-b
-                        border-[#DED4C4]/60
+                        border-[#E5DDD8]/60
                         px-3
                         py-3
                         text-left
@@ -470,7 +470,7 @@ function Sidebar({
                           font-medium
                           uppercase
                           tracking-[1.4px]
-                          text-[#5A3026]
+                          text-[#4B1F1B]
                           transition-colors
                           duration-300
                           group-hover:text-[#A98243]
@@ -510,7 +510,7 @@ function Sidebar({
               gap-3
             "
           >
-            <span className="h-px flex-1 bg-[#DED4C4]" />
+            <span className="h-px flex-1 bg-[#E5DDD8]" />
 
             <span
               className="
@@ -521,7 +521,7 @@ function Sidebar({
               "
             />
 
-            <span className="h-px flex-1 bg-[#DED4C4]" />
+            <span className="h-px flex-1 bg-[#E5DDD8]" />
           </div>
 
           {/* =================================================
@@ -583,17 +583,17 @@ function Sidebar({
                   justify-center
                   rounded-full
                   border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]/50
-                  text-[#71655B]
+                  border-[#E5DDD8]
+                  bg-[#FFFFFF]/50
+                  text-[#6B5651]
                   shadow-[0_5px_20px_rgba(67,35,28,0.05)]
                   backdrop-blur-xl
                   transition-all
                   duration-300
                   hover:-translate-y-1
                   hover:border-[#C8A15A]
-                  hover:bg-[#FFFDF9]/80
-                  hover:text-[#5A3026]
+                  hover:bg-[#FFFFFF]/80
+                  hover:text-[#4B1F1B]
                   sm:h-11
                   sm:w-11
                   ${
@@ -629,17 +629,17 @@ function Sidebar({
                   justify-center
                   rounded-full
                   border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]/50
-                  text-[#71655B]
+                  border-[#E5DDD8]
+                  bg-[#FFFFFF]/50
+                  text-[#6B5651]
                   shadow-[0_5px_20px_rgba(67,35,28,0.05)]
                   backdrop-blur-xl
                   transition-all
                   duration-300
                   hover:-translate-y-1
                   hover:border-[#C8A15A]
-                  hover:bg-[#FFFDF9]/80
-                  hover:text-[#5A3026]
+                  hover:bg-[#FFFFFF]/80
+                  hover:text-[#4B1F1B]
                   sm:h-11
                   sm:w-11
                 "
@@ -677,17 +677,17 @@ function Sidebar({
                   justify-center
                   rounded-full
                   border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]/50
-                  text-[#71655B]
+                  border-[#E5DDD8]
+                  bg-[#FFFFFF]/50
+                  text-[#6B5651]
                   shadow-[0_5px_20px_rgba(67,35,28,0.05)]
                   backdrop-blur-xl
                   transition-all
                   duration-300
                   hover:-translate-y-1
                   hover:border-[#C8A15A]
-                  hover:bg-[#FFFDF9]/80
-                  hover:text-[#5A3026]
+                  hover:bg-[#FFFFFF]/80
+                  hover:text-[#4B1F1B]
                   sm:h-11
                   sm:w-11
                   ${
@@ -728,17 +728,17 @@ function Sidebar({
                   justify-center
                   rounded-full
                   border
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]/50
-                  text-[#71655B]
+                  border-[#E5DDD8]
+                  bg-[#FFFFFF]/50
+                  text-[#6B5651]
                   shadow-[0_5px_20px_rgba(67,35,28,0.05)]
                   backdrop-blur-xl
                   transition-all
                   duration-300
                   hover:-translate-y-1
                   hover:border-[#C8A15A]
-                  hover:bg-[#FFFDF9]/80
-                  hover:text-[#5A3026]
+                  hover:bg-[#FFFFFF]/80
+                  hover:text-[#4B1F1B]
                   sm:h-11
                   sm:w-11
                   ${
@@ -769,7 +769,7 @@ function Sidebar({
           className="
             shrink-0
             border-t
-            border-[#DED4C4]
+            border-[#E5DDD8]
             px-5
             py-4
             sm:px-7
@@ -782,7 +782,7 @@ function Sidebar({
               font-['Cormorant_Garamond']
               text-[13px]
               italic
-              text-[#71655B]
+              text-[#6B5651]
               sm:text-[14px]
             "
           >

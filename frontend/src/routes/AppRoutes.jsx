@@ -1,8 +1,8 @@
+
 import {
   BrowserRouter,
   Route,
   Routes,
-  useLocation,
 } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
@@ -22,16 +22,15 @@ import AdminLayout from "../layouts/AdminLayout";
 import ProductManagement from "../pages/Products/ProductManagement";
 import Order from "../pages/Orders/Orders";
 import AdminRoute from "../routes/AdminRoute";
-import CategoryManagement from "../pages/Admin/CategoryManagement";
 import InventoryManagement from "../pages/Admin/InventoryManagement";
-
 import BestSellersPage from "../pages/BestSellers/BestSellers";
 import Collection from "../pages/Collection/Collection";
-
 import AnnouncementManagement from "../pages/Admin/AnnouncementManagement";
+import ReviewManagement from "../pages/Admin/ReviewManagement";
 
 import TermsOfService from "../pages/Legal/TermsOfService";
 import PrivacyPolicy from "../pages/Legal/PrivacyPolicy";
+import CouponManagement from "../pages/Admin/CouponManagement.jsx";
 
 function AppRoutes() {
   return (
@@ -42,171 +41,106 @@ function AppRoutes() {
 }
 
 function AppRouteContent() {
-  const location = useLocation();
-
-  /*
-    When a product is opened from another page,
-    React Router stores the previous page here.
-
-    This allows the previous page to remain visible
-    underneath the product modal.
-  */
-  const backgroundLocation = location.state?.backgroundLocation;
-
   return (
-    <>
-      <Routes location={backgroundLocation || location}>
+    <Routes>
+      {/* CUSTOMER WEBSITE */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} />
 
-        {/* =====================================================
-            CUSTOMER WEBSITE
-        ===================================================== */}
-
-        <Route element={<MainLayout />}>
-
-          <Route
-            path="/"
-            element={<Home />}
-          />
-
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/best-sellers"
-            element={<BestSellersPage />}
-          />
-
-          <Route
-            path="/collection"
-            element={<Collection />}
-          />
-
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
-
-          <Route
-            path="/account"
-            element={<Profile />}
-          />
-
-          <Route
-            path="/account-details"
-            element={<AccountDetails />}
-          />
-
-          <Route
-            path="/saved-addresses"
-            element={<SavedAddresses />}
-          />
-
-          <Route
-            path="/product/:id"
-            element={<ProductDetails />}
-          />
-
-          <Route
-            path="/track-order"
-            element={<TrackOrder />}
-          />
-
-          {/* =====================================================
-              LEGAL PAGES
-          ===================================================== */}
-
-          <Route
-            path="/terms"
-            element={<TermsOfService />}
-          />
-
-          <Route
-            path="/privacy-policy"
-            element={<PrivacyPolicy />}
-          />
-
-        </Route>
-
-
-        {/* =====================================================
-            CART / CHECKOUT
-        ===================================================== */}
+        <Route path="/login" element={<Login />} />
 
         <Route
-          path="/cart"
-          element={<Cart />}
+          path="/best-sellers"
+          element={<BestSellersPage />}
         />
 
         <Route
-          path="/checkout"
-          element={<Checkout />}
+          path="/collection"
+          element={<Collection />}
         />
 
+        <Route path="/profile" element={<Profile />} />
 
-        {/* =====================================================
-            ADMIN WEBSITE
-        ===================================================== */}
+        <Route path="/account" element={<Profile />} />
 
-        <Route element={<AdminRoute />}>
+        <Route
+          path="/account-details"
+          element={<AccountDetails />}
+        />
 
-          <Route element={<AdminLayout />}>
+        <Route
+          path="/saved-addresses"
+          element={<SavedAddresses />}
+        />
 
-            <Route
-              path="/admin"
-              element={<AdminDashboard />}
-            />
+        {/* FULL PRODUCT DETAILS PAGE */}
+        <Route
+          path="/product/:id"
+          element={<ProductDetails />}
+        />
 
-            <Route
-              path="/admin/products"
-              element={<ProductManagement />}
-            />
+        <Route
+          path="/track-order"
+          element={<TrackOrder />}
+        />
 
-            <Route
-  path="/admin/categories"
-  element={<CategoryManagement />}
-/>
+        {/* LEGAL PAGES */}
+        <Route
+          path="/terms"
+          element={<TermsOfService />}
+        />
 
-<Route
-  path="/admin/inventory"
-  element={<InventoryManagement />}
-/>
+        <Route
+          path="/privacy-policy"
+          element={<PrivacyPolicy />}
+        />
+      </Route>
 
-            <Route
-              path="/admin/orders"
-              element={<Order />}
-            />
+      {/* CART AND CHECKOUT */}
+      <Route path="/cart" element={<Cart />} />
 
-            <Route
-              path="/admin/announcements"
-              element={<AnnouncementManagement />}
-            />
+      <Route path="/checkout" element={<Checkout />} />
 
-          </Route>
-
-        </Route>
-
-
-      </Routes>
-
-
-      {/* =====================================================
-          PRODUCT QUICK VIEW MODAL
-      ===================================================== */}
-
-      {backgroundLocation && (
-        <Routes>
-
+      {/* ADMIN WEBSITE */}
+      <Route element={<AdminRoute />}>
+        <Route element={<AdminLayout />}>
           <Route
-            path="/product/:id"
-            element={<ProductDetails />}
+            path="/admin"
+            element={<AdminDashboard />}
           />
 
-        </Routes>
-      )}
+          <Route
+            path="/admin/products"
+            element={<ProductManagement />}
+          />
 
-    </>
+          <Route
+            path="/admin/inventory"
+            element={<InventoryManagement />}
+          />
+
+          <Route
+            path="/admin/orders"
+            element={<Order />}
+          />
+
+          <Route
+            path="/admin/announcements"
+            element={<AnnouncementManagement />}
+          />
+
+          <Route
+            path="/admin/reviews"
+            element={<ReviewManagement />}
+          />
+
+          <Route
+            path="/admin/coupons"
+            element={<CouponManagement />}
+          />
+        </Route>
+      </Route>
+    </Routes>
   );
 }
 

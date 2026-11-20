@@ -7,8 +7,8 @@ function OurPromise() {
       className="
         w-full
         overflow-hidden
-        bg-[#FAF7F0]
-        text-[#3A2A20]
+        bg-[#FFFFFF]
+        text-[#351C19]
       "
     >
       <div
@@ -77,7 +77,7 @@ function OurPromise() {
               font-normal
               leading-[0.95]
               tracking-[-0.7px]
-              text-[#43231C]
+              text-[#351411]
               sm:text-[48px]
               md:text-[52px]
               lg:text-[54px]
@@ -102,7 +102,7 @@ function OurPromise() {
               text-[11px]
               font-normal
               leading-[1.85]
-              text-[#71655B]
+              text-[#6B5651]
               sm:mt-6
               sm:text-[12px]
               md:text-[13px]
@@ -157,7 +157,7 @@ function OurPromise() {
               h-[70%]
               w-[48%]
               overflow-hidden
-              bg-[#F2EBDD]
+              bg-[#FFFFFF]
             "
           >
             <img
@@ -185,7 +185,7 @@ function OurPromise() {
               h-[70%]
               w-[48%]
               overflow-hidden
-              bg-[#F2EBDD]
+              bg-[#FFFFFF]
             "
           >
             <img

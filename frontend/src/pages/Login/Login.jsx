@@ -359,7 +359,7 @@ function Login() {
           inset-0
           z-0
           overflow-hidden
-          bg-[#FAF7F0]
+          bg-[#FFFFFF]
         "
       >
         <div className="h-full w-full overflow-hidden">
@@ -439,7 +439,7 @@ function Login() {
             rounded-[14px]
             border
             border-[#D8C8B5]
-            bg-[#FAF7F0]
+            bg-[#FFFFFF]
             shadow-[0_25px_80px_rgba(45,25,18,0.30)]
 
             sm:max-w-[390px]
@@ -463,7 +463,7 @@ function Login() {
               relative
               hidden
               overflow-hidden
-              bg-[#43231C]
+              bg-[#351411]
 
               lg:block
               lg:w-[38%]
@@ -494,9 +494,9 @@ function Login() {
                 absolute
                 inset-0
                 bg-gradient-to-t
-                from-[#43231C]/75
-                via-[#43231C]/10
-                to-[#43231C]/10
+                from-[#351411]/75
+                via-[#351411]/10
+                to-[#351411]/10
               "
             />
 
@@ -511,7 +511,7 @@ function Login() {
                 left-6
                 right-5
                 z-10
-                text-[#FFFDF9]
+                text-[#FFFFFF]
               "
             >
               <p
@@ -545,7 +545,7 @@ function Login() {
                   font-['Poppins']
                   text-[8px]
                   leading-4
-                  text-[#F2EBDD]/90
+                  text-[#FFFFFF]/90
                 "
               >
                 Wear your story.
@@ -556,7 +556,7 @@ function Login() {
                   font-['Poppins']
                   text-[8px]
                   leading-4
-                  text-[#F2EBDD]/90
+                  text-[#FFFFFF]/90
                 "
               >
                 Premium looks. Real comfort.
@@ -572,7 +572,7 @@ function Login() {
             className="
               relative
               w-full
-              bg-[#FAF7F0]
+              bg-[#FFFFFF]
 
               lg:w-[62%]
             "
@@ -598,13 +598,13 @@ function Login() {
                 justify-center
                 rounded-full
                 border
-                border-[#DED4C4]
-                bg-[#FFFDF9]/85
-                text-[#5A3026]
+                border-[#E5DDD8]
+                bg-[#FFFFFF]/85
+                text-[#4B1F1B]
                 transition-all
                 duration-300
                 hover:border-[#C8A15A]
-                hover:bg-[#F2EBDD]
+                hover:bg-[#FFFFFF]
               "
             >
               <FiX
@@ -649,7 +649,7 @@ function Login() {
                     font-medium
                     leading-none
                     tracking-[0.30em]
-                    text-[#5A3026]
+                    text-[#4B1F1B]
 
                     sm:text-[27px]
                   "
@@ -715,7 +715,7 @@ function Login() {
                     text-[30px]
                     font-normal
                     leading-none
-                    text-[#43231C]
+                    text-[#351411]
 
                     sm:text-[33px]
                   "
@@ -753,8 +753,8 @@ function Login() {
                   grid-cols-2
                   rounded-[6px]
                   border
-                  border-[#DED4C4]
-                  bg-[#F2EBDD]/45
+                  border-[#E5DDD8]
+                  bg-[#FFFFFF]/45
                   p-1
                 "
               >
@@ -779,8 +779,8 @@ function Login() {
 
                     ${
                       loginMethod === "mobile"
-                        ? "bg-[#5A3026] text-[#FFFDF9] shadow-sm"
-                        : "text-[#5A3026] hover:bg-[#F2EBDD]"
+                        ? "bg-[#4B1F1B] text-[#FFFFFF] shadow-sm"
+                        : "text-[#4B1F1B] hover:bg-[#FFFFFF]"
                     }
                   `}
                 >
@@ -807,8 +807,8 @@ function Login() {
 
                     ${
                       loginMethod === "email"
-                        ? "bg-[#5A3026] text-[#FFFDF9] shadow-sm"
-                        : "text-[#5A3026] hover:bg-[#F2EBDD]"
+                        ? "bg-[#4B1F1B] text-[#FFFFFF] shadow-sm"
+                        : "text-[#4B1F1B] hover:bg-[#FFFFFF]"
                     }
                   `}
                 >
@@ -853,14 +853,14 @@ function Login() {
                     rounded-[5px]
                     border
                     border-[#D8C8B5]
-                    bg-[#F2EBDD]
+                    bg-[#FFFFFF]
                     px-3
                     py-2
                     text-center
                     font-['Poppins']
                     text-[9px]
                     leading-4
-                    text-[#5A3026]
+                    text-[#4B1F1B]
                   "
                 >
                   {success}
@@ -893,7 +893,7 @@ function Login() {
                         font-medium
                         uppercase
                         tracking-[1.7px]
-                        text-[#5A3026]
+                        text-[#4B1F1B]
                       "
                     >
                       Mobile Number
@@ -907,7 +907,7 @@ function Login() {
                         rounded-[6px]
                         border
                         border-[#D8C8B5]
-                        bg-[#FFFDF9]
+                        bg-[#FFFFFF]
                         transition-all
                         focus-within:border-[#C8A15A]
                         focus-within:ring-1
@@ -925,10 +925,10 @@ function Login() {
                           items-center
                           justify-center
                           border-r
-                          border-[#DED4C4]
+                          border-[#E5DDD8]
                           font-['Poppins']
                           text-[11px]
-                          text-[#5A3026]
+                          text-[#4B1F1B]
                         "
                       >
                         +91
@@ -956,7 +956,7 @@ function Login() {
                             pr-9
                             font-['Poppins']
                             text-[11px]
-                            text-[#3A2A20]
+                            text-[#351C19]
                             outline-none
                             placeholder:text-[#918477]
                             disabled:cursor-not-allowed
@@ -999,7 +999,7 @@ function Login() {
                         font-medium
                         uppercase
                         tracking-[1.7px]
-                        text-[#5A3026]
+                        text-[#4B1F1B]
                       "
                     >
                       Email Address
@@ -1013,7 +1013,7 @@ function Login() {
                         rounded-[6px]
                         border
                         border-[#D8C8B5]
-                        bg-[#FFFDF9]
+                        bg-[#FFFFFF]
                         transition-all
                         focus-within:border-[#C8A15A]
                         focus-within:ring-1
@@ -1037,7 +1037,7 @@ function Login() {
                           pr-9
                           font-['Poppins']
                           text-[11px]
-                          text-[#3A2A20]
+                          text-[#351C19]
                           outline-none
                           placeholder:text-[#918477]
                           disabled:cursor-not-allowed
@@ -1080,16 +1080,16 @@ function Login() {
                       justify-center
                       gap-2
                       rounded-[6px]
-                      bg-[#5A3026]
+                      bg-[#4B1F1B]
                       font-['Poppins']
                       text-[10px]
                       font-medium
                       uppercase
                       tracking-[1.8px]
-                      text-[#FFFDF9]
+                      text-[#FFFFFF]
                       transition-all
                       duration-300
-                      hover:bg-[#43231C]
+                      hover:bg-[#351411]
                       active:scale-[0.99]
                       disabled:cursor-not-allowed
                       disabled:opacity-60
@@ -1127,7 +1127,7 @@ function Login() {
                         font-medium
                         uppercase
                         tracking-[1.7px]
-                        text-[#5A3026]
+                        text-[#4B1F1B]
                       "
                     >
                       Verification Code
@@ -1141,7 +1141,7 @@ function Login() {
                         rounded-[6px]
                         border
                         border-[#D8C8B5]
-                        bg-[#FFFDF9]
+                        bg-[#FFFFFF]
                         transition-all
                         focus-within:border-[#C8A15A]
                         focus-within:ring-1
@@ -1168,7 +1168,7 @@ function Login() {
                           font-['Poppins']
                           text-[11px]
                           tracking-[0.2em]
-                          text-[#3A2A20]
+                          text-[#351C19]
                           outline-none
                           placeholder:text-[#918477]
                           placeholder:tracking-normal
@@ -1204,16 +1204,16 @@ function Login() {
                         justify-center
                         gap-2
                         rounded-[6px]
-                        bg-[#5A3026]
+                        bg-[#4B1F1B]
                         font-['Poppins']
                         text-[10px]
                         font-medium
                         uppercase
                         tracking-[1.8px]
-                        text-[#FFFDF9]
+                        text-[#FFFFFF]
                         transition-all
                         duration-300
-                        hover:bg-[#43231C]
+                        hover:bg-[#351411]
                         active:scale-[0.99]
                         disabled:cursor-not-allowed
                         disabled:opacity-60
@@ -1234,11 +1234,11 @@ function Login() {
                         w-full
                         font-['Poppins']
                         text-[9px]
-                        text-[#71655B]
+                        text-[#6B5651]
                         underline
                         underline-offset-4
                         transition-colors
-                        hover:text-[#5A3026]
+                        hover:text-[#4B1F1B]
                       "
                     >
                       Change{" "}
@@ -1261,7 +1261,7 @@ function Login() {
                         font-medium
                         text-[#A98243]
                         transition-colors
-                        hover:text-[#5A3026]
+                        hover:text-[#4B1F1B]
                         hover:underline
                         disabled:opacity-50
                       "
@@ -1295,7 +1295,7 @@ function Login() {
                   type="button"
                   onClick={() => navigate("/terms")}
                   className="
-                    text-[#5A3026]
+                    text-[#4B1F1B]
                     underline
                     underline-offset-2
                     transition-colors
@@ -1311,7 +1311,7 @@ function Login() {
                     navigate("/privacy-policy")
                   }
                   className="
-                    text-[#5A3026]
+                    text-[#4B1F1B]
                     underline
                     underline-offset-2
                     transition-colors

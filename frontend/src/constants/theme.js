@@ -1,13 +1,13 @@
 export const COLORS = {
   // Primary Sirraha brand colors
-  primary: "#5A3026",
-  primaryDark: "#43231C",
-  primaryLight: "#795033",
+  primary: "#4B1F1B",
+  primaryDark: "#351411",
+  primaryLight: "#69352D",
 
   // Backgrounds
-  secondary: "#FAF7F0",
-  cream: "#F2EBDD",
-  warmWhite: "#FFFDF9",
+  secondary: "#FFFFFF",
+  cream: "#FFFFFF",
+  warmWhite: "#FFFFFF",
 
   // Antique gold
   accent: "#C8A15A",
@@ -15,8 +15,8 @@ export const COLORS = {
   accentDark: "#A98243",
 
   // Text
-  text: "#3A2A20",
-  textSecondary: "#71655B",
+  text: "#351C19",
+  textSecondary: "#6B5651",
   textMuted: "#918477",
 
   // Neutral colors
@@ -24,8 +24,8 @@ export const COLORS = {
   black: "#241A15",
 
   // Borders
-  border: "#DED4C4",
-  borderLight: "#EAE2D5",
+  border: "#E5DDD8",
+  borderLight: "#F1ECE9",
 };
 
 export const FONTS = {

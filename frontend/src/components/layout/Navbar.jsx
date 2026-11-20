@@ -1,70 +1,35 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { HiOutlineBars3 } from "react-icons/hi2";
-
 import {
   FiSearch,
   FiUser,
   FiShoppingBag,
-  FiChevronDown,
 } from "react-icons/fi";
 
 import Sidebar from "./Sidebar";
 import { useCart } from "../../hooks/useCart";
 
-function Navbar({
-  onSearchOpen,
-  onSearchCategory,
-}) {
-  const [isSidebarOpen, setIsSidebarOpen] =
-    useState(false);
-
-  const [isCategoryOpen, setIsCategoryOpen] =
-    useState(false);
+function Navbar({ onSearchOpen, onSearchCategory }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const navigate = useNavigate();
 
-  // =========================================================
-  // CART
-  // =========================================================
+  const { cartCount, openCart } = useCart();
 
-  const {
-    cartCount,
-    openCart,
-  } = useCart();
-
-  // =========================================================
   // MAIN NAVIGATION
-  // =========================================================
-
   const mainNavigation = [
-    {
-      label: "Home",
-      path: "/",
-    },
-    {
-      label: "All Collection",
-      path: "/collection",
-    },
-    {
-      label: "New Arrivals",
-      path: "/collection?type=new-arrivals",
-    },
-    {
-      label: "Best Sellers",
-      path: "/collection?type=best-sellers",
-    },
-    {
-      label: "Track Order",
-      path: "/track-order",
-    },
+    { label: "Home", path: "/" },
+    { label: "All Collection", path: "/collection" },
+    { label: "New Arrivals", path: "/collection?type=new-arrivals" },
+    { label: "Best Sellers", path: "/collection?type=best-sellers" },
+    { label: "Track Order", path: "/track-order" },
   ];
 
-  // =========================================================
   // SIRRAHA CATEGORIES
-  // =========================================================
-
   const categories = [
     {
       label: "Short Kurtis",
@@ -98,10 +63,7 @@ function Navbar({
     },
   ];
 
-  // =========================================================
   // SEARCH
-  // =========================================================
-
   const handleSearchClick = () => {
     setIsCategoryOpen(false);
     setIsSidebarOpen(false);
@@ -111,30 +73,22 @@ function Navbar({
     }
   };
 
-  // =========================================================
-  // SEARCH CATEGORY
-  // =========================================================
-
+  // SEARCH BY CATEGORY
   const handleCategorySearch = (category) => {
     setIsCategoryOpen(false);
     setIsSidebarOpen(false);
 
     if (onSearchCategory) {
-      onSearchCategory(category);
+      onSearchCategory(category.searchQuery || category.label);
       return;
     }
 
-    // Fallback only if search callback hasn't been connected yet.
     navigate(category.path);
   };
 
-  // =========================================================
   // ACCOUNT
-  // =========================================================
-
   const handleAccountClick = () => {
-    const storedUser =
-      localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
     if (storedUser) {
       navigate("/account");
@@ -143,34 +97,18 @@ function Navbar({
     }
   };
 
-  // =========================================================
   // NAVIGATION
-  // =========================================================
-
   const handleNavigation = (path) => {
     setIsCategoryOpen(false);
     setIsSidebarOpen(false);
 
-    // -------------------------------------------------------
-    // SEARCH LINKS
-    // -------------------------------------------------------
-    // This catches old /search?q=... links coming from the
-    // mobile Sidebar or anywhere else using this function.
-    // Instead of opening a new page, we open the new search
-    // panel on the homepage.
-    // -------------------------------------------------------
-
     if (path.startsWith("/search")) {
-      const searchQuery =
-        new URLSearchParams(
-          path.split("?")[1] || ""
-        ).get("q");
+      const searchQuery = new URLSearchParams(
+        path.split("?")[1] || ""
+      ).get("q");
 
       if (onSearchCategory && searchQuery) {
-        onSearchCategory(
-          decodeURIComponent(searchQuery)
-        );
-
+        onSearchCategory(decodeURIComponent(searchQuery));
         return;
       }
 
@@ -183,599 +121,275 @@ function Navbar({
     navigate(path);
   };
 
-  // =========================================================
-  // OPEN CART
-  // =========================================================
-
+  // CART
   const handleCartClick = () => {
     setIsCategoryOpen(false);
     setIsSidebarOpen(false);
-
     openCart();
   };
 
   return (
     <>
-      {/* =====================================================
-          NAVBAR
-      ===================================================== */}
-
-      <nav
-        className="
-          relative
-          z-[100]
-          w-full
-          border-b
-          border-[#DED4C4]
-          bg-[#FAF7F0]/95
-          shadow-[0_4px_24px_rgba(67,35,28,0.05)]
-          backdrop-blur-xl
-        "
-      >
-        {/* ===================================================
-            TOP NAVIGATION
-        =================================================== */}
-
+      <nav className="relative z-[100] m-0 w-full bg-white">
+        {/* TOP ROW: LOGO AND ACTION ICONS */}
         <div
           className="
-            relative
-            mx-auto
-            flex
-            h-[58px]
-            w-full
-            items-center
-            justify-center
-            px-14
-            sm:h-[62px]
-            sm:px-20
-            md:h-[66px]
-            md:px-24
-            lg:h-[68px]
-            lg:px-32
-            xl:h-[70px]
+            relative mx-auto flex w-full items-center justify-center
+  h-[48px] px-4
+  sm:h-[52px] sm:px-6
+  md:h-[60px] md:px-8
+  lg:h-[64px] lg:px-12
+  xl:h-[68px]
           "
         >
-          {/* =================================================
-              MOBILE HAMBURGER
-              ONLY MOBILE
-          ================================================= */}
-
+          {/* MOBILE MENU */}
           <button
             type="button"
-            onClick={() =>
-              setIsSidebarOpen(true)
-            }
+            onClick={() => setIsSidebarOpen(true)}
             aria-label="Open menu"
             className="
-              absolute
-              left-3
-              top-1/2
-              flex
-              h-9
-              w-9
-              -translate-y-1/2
-              items-center
-              justify-center
-              rounded-full
-              text-[#43231C]
-              transition-all
-              duration-300
-              hover:bg-[#F2EBDD]
-              sm:left-5
-              md:hidden
+              absolute left-3 top-1/2 z-[320]
+              flex h-10 w-10 -translate-y-1/2
+              items-center justify-center
+              text-[#4B1F1B] transition-colors
+              hover:text-[#A98243]
+              sm:left-5 md:hidden
             "
           >
-            <HiOutlineBars3
-              className="
-                h-[20px]
-                w-[20px]
-                stroke-[1.35]
-                sm:h-[21px]
-                sm:w-[21px]
-              "
-            />
+            <HiOutlineBars3 className="h-[22px] w-[22px] stroke-[1.3]" />
           </button>
 
-          {/* =================================================
-              CENTER SIRRAHA LOGO
-          ================================================= */}
-
+          {/* CENTERED SIRRAHA LOGO */}
           <button
             type="button"
             onClick={() => navigate("/")}
             aria-label="Go to homepage"
             className="
-              group
-              flex
-              min-w-0
-              items-center
-              justify-center
-              border-none
-              bg-transparent
-              p-0
-              outline-none
+              group flex min-w-0 items-center justify-center
+              border-0 bg-transparent p-0 outline-none
             "
           >
             <span
               className="
-                font-['Cormorant_Garamond']
-                text-[24px]
-                font-medium
-                leading-none
-                tracking-[0.22em]
-                text-[#5A3026]
-                transition-colors
-                duration-300
-                group-hover:text-[#43231C]
-                sm:text-[27px]
-                sm:tracking-[0.26em]
-                md:text-[29px]
-                md:tracking-[0.28em]
-                lg:text-[30px]
-                lg:tracking-[0.30em]
+                whitespace-nowrap
+                font-['Cormorant_Garamond',serif]
+                text-[29px] font-medium leading-none
+                tracking-[0.22em] text-[#4B1F1B]
+                transition-colors duration-300
+                group-hover:text-[#69352D]
+                sm:text-[32px] sm:tracking-[0.24em]
+                md:text-[37px] md:tracking-[0.27em]
+                lg:text-[40px] lg:tracking-[0.30em]
               "
             >
               SIRRAHA
             </span>
           </button>
 
-          {/* =================================================
-              RIGHT ACTION ICONS
-          ================================================= */}
-
+          {/* RIGHT ACTION ICONS */}
           <div
             className="
-              absolute
-              right-2
-              top-1/2
-              flex
-              -translate-y-1/2
-              items-center
-              gap-1
-              sm:right-4
-              sm:gap-1.5
-              md:right-6
-              md:gap-2
-              lg:right-9
-              lg:gap-3
+              absolute right-2 top-1/2 flex
+              -translate-y-1/2 items-center gap-1
+              sm:right-4 sm:gap-2
+              md:right-7 md:gap-3
+              lg:right-10 lg:gap-4
               xl:right-12
             "
           >
-            {/* =================================================
-                SEARCH
-            ================================================= */}
-
+            {/* SEARCH */}
             <button
               type="button"
               aria-label="Open search"
               onClick={handleSearchClick}
               className="
-                flex
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-full
-                text-[#43231C]
-                transition-all
-                duration-300
-                hover:bg-[#F2EBDD]
-                hover:text-[#5A3026]
-                sm:h-10
-                sm:w-10
+                flex h-9 w-9 items-center justify-center
+                text-[#4B1F1B] transition-colors
+                hover:text-[#A98243]
+                sm:h-10 sm:w-10
               "
             >
-              <FiSearch
-                className="
-                  h-[17px]
-                  w-[17px]
-                  stroke-[1.45]
-                  sm:h-[18px]
-                  sm:w-[18px]
-                  md:h-[19px]
-                  md:w-[19px]
-                "
-              />
+              <FiSearch className="h-[19px] w-[19px] stroke-[1.4] sm:h-5 sm:w-5" />
             </button>
 
-            {/* =================================================
-                ACCOUNT
-            ================================================= */}
-
+            {/* ACCOUNT */}
             <button
               type="button"
               aria-label="Account"
               onClick={handleAccountClick}
               className="
-                hidden
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-full
-                text-[#43231C]
-                transition-all
-                duration-300
-                hover:bg-[#F2EBDD]
-                hover:text-[#5A3026]
-                sm:flex
-                sm:h-10
-                sm:w-10
+                hidden h-9 w-9 items-center justify-center
+                text-[#4B1F1B] transition-colors
+                hover:text-[#A98243]
+                sm:flex sm:h-10 sm:w-10
               "
             >
-              <FiUser
-                className="
-                  h-[17px]
-                  w-[17px]
-                  stroke-[1.45]
-                  sm:h-[18px]
-                  sm:w-[18px]
-                "
-              />
+              <FiUser className="h-[19px] w-[19px] stroke-[1.4] sm:h-5 sm:w-5" />
             </button>
 
-            {/* =================================================
-                SHOPPING BAG
-            ================================================= */}
-
+            {/* CART */}
             <button
               type="button"
               aria-label="Open shopping bag"
               onClick={handleCartClick}
               className="
-                relative
-                flex
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-full
-                text-[#43231C]
-                transition-all
-                duration-300
-                hover:bg-[#F2EBDD]
-                hover:text-[#5A3026]
-                sm:h-10
-                sm:w-10
+                relative flex h-9 w-9 items-center justify-center
+                text-[#4B1F1B] transition-colors
+                hover:text-[#A98243]
+                sm:h-10 sm:w-10
               "
             >
-              <FiShoppingBag
-                className="
-                  h-[18px]
-                  w-[18px]
-                  stroke-[1.45]
-                  sm:h-[19px]
-                  sm:w-[19px]
-                "
-              />
-
-              {/* CART BADGE */}
+              <FiShoppingBag className="h-[20px] w-[20px] stroke-[1.4]" />
 
               {cartCount > 0 && (
                 <span
                   className="
-                    absolute
-                    right-0
-                    top-0
-                    flex
-                    h-[15px]
-                    min-w-[15px]
-                    items-center
-                    justify-center
-                    rounded-full
-                    bg-[#C8A15A]
-                    px-1
-                    font-['Poppins']
-                    text-[7px]
-                    font-semibold
-                    leading-none
-                    text-[#3A2A20]
-                    sm:right-0.5
-                    sm:top-0.5
-                    sm:h-[16px]
-                    sm:min-w-[16px]
-                    sm:text-[8px]
+                    absolute right-0 top-0 flex
+                    h-[16px] min-w-[16px] items-center
+                    justify-center rounded-full
+                    bg-[#C8A15A] px-1
+                    font-['Poppins',sans-serif]
+                    text-[9px] font-medium leading-none
+                    text-white
+                    sm:right-0.5 sm:top-0.5
                   "
                 >
-                  {cartCount > 99
-                    ? "99+"
-                    : cartCount}
+                  {cartCount > 99 ? "99+" : cartCount}
                 </span>
               )}
             </button>
           </div>
         </div>
 
-        {/* =====================================================
-            DESKTOP / TABLET NAVIGATION
-            MOBILE HIDDEN
-        ===================================================== */}
-
-        <div
-          className="
-            hidden
-            border-t
-            border-[#DED4C4]
-            md:block
-          "
-        >
+        {/* DESKTOP NAVIGATION: NO DIVIDER LINE */}
+        <div className="hidden bg-white md:block">
           <div
             className="
-              mx-auto
-              flex
-              min-h-[44px]
-              w-full
-              items-center
-              justify-center
-              gap-4
-              overflow-visible
-              px-4
-              lg:gap-6
-              xl:gap-8
+              mx-auto flex min-h-[38px] w-full
+              items-center justify-center
+              gap-5 overflow-visible px-4
+              lg:gap-8 lg:px-8
+              xl:gap-10 xl:px-12
+              2xl:gap-12
             "
           >
-            {/* =================================================
-                MAIN NAV LINKS
-            ================================================= */}
-
+            {/* MAIN LINKS */}
             {mainNavigation.map((item) => (
               <button
                 key={item.label}
                 type="button"
-                onClick={() =>
-                  handleNavigation(item.path)
-                }
+                onClick={() => handleNavigation(item.path)}
                 className="
-                  group
-                  relative
-                  shrink-0
-                  py-3
-                  font-['Poppins']
-                  text-[8px]
-                  font-semibold
-                  uppercase
-                  tracking-[1.4px]
-                  text-[#5A3026]
-                  transition-colors
-                  duration-300
+                  shrink-0 whitespace-nowrap
+                  py-2
+                  font-['Poppins',sans-serif]
+                  text-[10px] font-normal uppercase
+                  tracking-[1.5px] text-[#4B1F1B]
+                  transition-colors duration-200
                   hover:text-[#A98243]
-                  lg:text-[9px]
-                  lg:tracking-[1.8px]
+                  lg:text-[11px] lg:tracking-[1.7px]
                 "
               >
                 {item.label}
-
-                <span
-                  className="
-                    absolute
-                    bottom-0
-                    left-1/2
-                    h-px
-                    w-0
-                    -translate-x-1/2
-                    bg-[#C8A15A]
-                    transition-all
-                    duration-300
-                    group-hover:w-full
-                  "
-                />
               </button>
             ))}
 
-            {/* =================================================
-                CATEGORIES DROPDOWN
-            ================================================= */}
-
+            {/* CATEGORIES DROPDOWN */}
             <div
-              className="
-                relative
-                shrink-0
-              "
-              onMouseEnter={() =>
-                setIsCategoryOpen(true)
-              }
-              onMouseLeave={() =>
-                setIsCategoryOpen(false)
-              }
+              className="relative shrink-0"
+              onMouseEnter={() => setIsCategoryOpen(true)}
+              onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <button
                 type="button"
-                onClick={() =>
-                  setIsCategoryOpen(
-                    (previous) =>
-                      !previous
-                  )
-                }
+                onClick={() => setIsCategoryOpen((previous) => !previous)}
                 className="
-                  group
-                  relative
-                  flex
-                  items-center
-                  gap-1.5
-                  py-3
-                  font-['Poppins']
-                  text-[8px]
-                  font-semibold
-                  uppercase
-                  tracking-[1.4px]
-                  text-[#5A3026]
-                  transition-colors
-                  duration-300
+                  flex items-center gap-2 whitespace-nowrap
+                  py-4
+                  font-['Poppins',sans-serif]
+                  text-[10px] font-normal uppercase
+                  tracking-[1.5px] text-[#4B1F1B]
+                  transition-colors duration-200
                   hover:text-[#A98243]
-                  lg:text-[9px]
-                  lg:tracking-[1.8px]
+                  lg:text-[11px] lg:tracking-[1.7px]
                 "
-                aria-expanded={
-                  isCategoryOpen
-                }
+                aria-expanded={isCategoryOpen}
                 aria-haspopup="true"
               >
-                <span>
-                  Categories
-                </span>
-
-                <FiChevronDown
-                  size={12}
-                  strokeWidth={1.4}
-                  className={`
-                    transition-transform
-                    duration-300
-                    ${
-                      isCategoryOpen
-                        ? "rotate-180"
-                        : ""
-                    }
-                  `}
-                />
-
-                <span
-                  className="
-                    absolute
-                    bottom-0
-                    left-0
-                    h-px
-                    w-0
-                    bg-[#C8A15A]
-                    transition-all
-                    duration-300
-                    group-hover:w-full
-                  "
-                />
+                Categories
               </button>
 
-              {/* =================================================
-                  DROPDOWN PANEL
-              ================================================= */}
 
-              {isCategoryOpen && (
-                <div
-                  className="
-                    absolute
-                    left-1/2
-                    top-full
-                    z-[120]
-                    w-[300px]
-                    -translate-x-1/2
-                    pt-2
-                  "
-                >
-                  <div
-                    className="
-                      overflow-hidden
-                      rounded-b-2xl
-                      border
-                      border-[#DED4C4]/80
-                      bg-[#FFFDF9]/85
-                      shadow-[0_18px_50px_rgba(67,35,28,0.12)]
-                      backdrop-blur-2xl
-                    "
-                  >
-                    {/* DROPDOWN HEADER */}
+{/* CATEGORIES DROPDOWN — REFINED FROSTED GLASS */}
+{isCategoryOpen && (
+  <div
+    className="
+      absolute
+      left-0
+      top-full
+      z-[320]
+      w-[260px]
+      pt-2
+    "
+  >
+    <div
+      className="
+        w-full
+        overflow-hidden
+        rounded-b-md
+        border border-white/40
+        bg-[#FFFDFB]/80
+        shadow-[0_10px_30px_rgba(53,20,17,0.10)]
+        backdrop-blur-xl
+      "
+    >
+      {categories.map((category, index) => (
+        <button
+          key={category.label}
+          type="button"
+          onClick={() => handleCategorySearch(category)}
+          className={`
+            flex
+            w-full
+            items-center
+            px-7
+            py-3
+            text-left
+            font-['Poppins',sans-serif]
+            text-[14px]
+            font-normal
+            leading-[1.5]
+            tracking-[0.1px]
+            text-[#4B1F1B]
+            transition-all
+            duration-200
+            hover:bg-white/60
+            hover:pl-8
+            hover:text-[#A98243]
+            ${
+              index !== categories.length - 1
+                ? "border-b border-[#4B1F1B]/[0.05]"
+                : ""
+            }
+          `}
+        >
+          {category.label}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
 
-                    <div
-                      className="
-                        border-b
-                        border-[#DED4C4]
-                        px-5
-                        py-4
-                      "
-                    >
-                      <p
-                        className="
-                          font-['Poppins']
-                          text-[7px]
-                          font-medium
-                          uppercase
-                          tracking-[2.5px]
-                          text-[#A98243]
-                        "
-                      >
-                        Explore Categories
-                      </p>
-                    </div>
 
-                    {/* CATEGORY ITEMS */}
-
-                    <div className="grid grid-cols-2">
-                      {categories.map(
-                        (category) => (
-                          <button
-                            key={
-                              category.label
-                            }
-                            type="button"
-                            onClick={() =>
-                              handleCategorySearch(
-                                category
-                              )
-                            }
-                            className="
-                              group
-                              flex
-                              items-center
-                              justify-between
-                              border-b
-                              border-r
-                              border-[#DED4C4]/70
-                              px-4
-                              py-4
-                              text-left
-                              transition-all
-                              duration-300
-                              hover:bg-[#F2EBDD]/80
-                            "
-                          >
-                            <span
-                              className="
-                                font-['Cormorant_Garamond']
-                                text-[16px]
-                                leading-tight
-                                text-[#5A3026]
-                                transition-colors
-                                duration-300
-                                group-hover:text-[#A98243]
-                              "
-                            >
-                              {
-                                category.label
-                              }
-                            </span>
-
-                            <span
-                              className="
-                                ml-2
-                                text-[12px]
-                                text-[#C8A15A]
-                                opacity-0
-                                transition-all
-                                duration-300
-                                group-hover:translate-x-0.5
-                                group-hover:opacity-100
-                              "
-                            >
-                              →
-                            </span>
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </nav>
 
-      {/* =======================================================
-          MOBILE SIDEBAR
-      ======================================================= */}
-
+      {/* MOBILE SIDEBAR */}
       <Sidebar
         isOpen={isSidebarOpen}
-        onClose={() =>
-          setIsSidebarOpen(false)
-        }
+        onClose={() => setIsSidebarOpen(false)}
         categories={categories}
         mainNavigation={mainNavigation}
         onNavigate={handleNavigation}

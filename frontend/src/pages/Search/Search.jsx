@@ -15,6 +15,10 @@ import {
 import { getProducts } from "../../constants/api";
 import ProductCard from "../../components/product/ProductCard";
 
+// ============================================================
+// POPULAR SEARCHES
+// ============================================================
+
 const searchCategories = [
   "Short Kurtis",
   "Long Kurtis",
@@ -23,6 +27,10 @@ const searchCategories = [
   "Palazzos",
   "Farshi Salwar Suit",
 ];
+
+// ============================================================
+// CATEGORY SEARCH ALIASES
+// ============================================================
 
 const categoryAliases = {
   "short kurtis": [
@@ -65,54 +73,58 @@ function Search({
   onClose,
   initialQuery = "",
 }) {
-  // =========================================================
+  // ==========================================================
   // STATE
-  // =========================================================
+  // ==========================================================
 
-  const [searchText, setSearchText] =
-    useState(() => initialQuery || "");
+  const [searchText, setSearchText] = useState(
+    initialQuery || ""
+  );
 
-  const [query, setQuery] =
-    useState(() => initialQuery || "");
+  const [query, setQuery] = useState(
+    initialQuery || ""
+  );
 
-  const [products, setProducts] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const inputRef = useRef(null);
+  const requestRef = useRef(false);
 
-  const productsLoadedRef = useRef(false);
-
-  // =========================================================
+  // ==========================================================
   // CLOSE SEARCH
-  // IMPORTANT:
-  // Declared BEFORE the Escape-key effect.
-  // =========================================================
+  // ==========================================================
 
   const handleClose = useCallback(() => {
     setSearchText("");
     setQuery("");
-    onClose();
+    onClose?.();
   }, [onClose]);
 
-  // =========================================================
+  // ==========================================================
   // LOAD PRODUCTS
-  // =========================================================
+  // ==========================================================
 
   useEffect(() => {
-    if (!isOpen || productsLoadedRef.current) {
+    if (!isOpen || requestRef.current) {
       return;
     }
 
-    productsLoadedRef.current = true;
+    let cancelled = false;
+
+    requestRef.current = true;
 
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        setLoadError(false);
 
         const data = await getProducts();
+
+        if (cancelled) {
+          return;
+        }
 
         const activeProducts = Array.isArray(data)
           ? data.filter(
@@ -123,41 +135,51 @@ function Search({
 
         setProducts(activeProducts);
       } catch (error) {
-        console.error(
-          "Sirraha search error:",
-          error
-        );
+        if (!cancelled) {
+          console.error(
+            "Sirraha search error:",
+            error
+          );
 
-        setProducts([]);
+          setProducts([]);
+          setLoadError(true);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          requestRef.current = false;
+        }
       }
     };
 
     fetchProducts();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
-  // =========================================================
-  // AUTO FOCUS SEARCH
-  // =========================================================
+  // ==========================================================
+  // AUTO-FOCUS SEARCH INPUT
+  // ==========================================================
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       inputRef.current?.focus();
-    }, 250);
+    }, 150);
 
     return () => {
-      clearTimeout(timer);
+      window.clearTimeout(timer);
     };
   }, [isOpen]);
 
-  // =========================================================
-  // LOCK HOMEPAGE SCROLL WHILE SEARCH IS OPEN
-  // =========================================================
+  // ==========================================================
+  // LOCK PAGE SCROLL WHILE SEARCH IS OPEN
+  // ==========================================================
 
   useEffect(() => {
     if (!isOpen) {
@@ -175,9 +197,9 @@ function Search({
     };
   }, [isOpen]);
 
-  // =========================================================
+  // ==========================================================
   // ESCAPE KEY
-  // =========================================================
+  // ==========================================================
 
   useEffect(() => {
     if (!isOpen) {
@@ -203,17 +225,18 @@ function Search({
     };
   }, [isOpen, handleClose]);
 
-  // =========================================================
+  // ==========================================================
   // FILTER PRODUCTS
-  // =========================================================
+  // ==========================================================
 
   const filteredProducts = useMemo(() => {
     if (!query.trim()) {
       return [];
     }
 
-    const normalizedQuery =
-      query.toLowerCase().trim();
+    const normalizedQuery = query
+      .toLowerCase()
+      .trim();
 
     const aliases =
       categoryAliases[normalizedQuery] || [
@@ -234,8 +257,7 @@ function Search({
         product.productCode?.toLowerCase() || "";
 
       return aliases.some((alias) => {
-        const value =
-          alias.toLowerCase();
+        const value = alias.toLowerCase();
 
         return (
           name.includes(value) ||
@@ -247,9 +269,9 @@ function Search({
     });
   }, [products, query]);
 
-  // =========================================================
-  // SEARCH SUBMIT
-  // =========================================================
+  // ==========================================================
+  // SUBMIT SEARCH
+  // ==========================================================
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -264,202 +286,154 @@ function Search({
     setQuery(value);
   };
 
-  // =========================================================
-  // POPULAR SEARCH
-  // =========================================================
+  // ==========================================================
+  // POPULAR SEARCH CLICK
+  // ==========================================================
 
   const handleCategorySearch = (category) => {
     setSearchText(category);
     setQuery(category);
   };
 
-  // =========================================================
+  // ==========================================================
   // CLEAR SEARCH
-  // =========================================================
+  // ==========================================================
 
   const handleClear = () => {
     setSearchText("");
     setQuery("");
 
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
+    inputRef.current?.focus();
   };
 
-  // =========================================================
+  // ==========================================================
   // CLOSED STATE
-  // =========================================================
+  // ==========================================================
 
   if (!isOpen) {
     return null;
   }
 
-  // =========================================================
+  // ==========================================================
   // UI
-  // =========================================================
+  // ==========================================================
 
   return (
     <section
+      role="dialog"
+      aria-label="Search Sirraha"
+      aria-modal="true"
       className="
-        relative
-        w-full
-
-        max-h-[calc(100vh-92px)]
-        md:max-h-[calc(100vh-153px)]
-
-        overflow-x-hidden
-        overflow-y-auto
-
-        overscroll-contain
-
-        border-b
-        border-[#DED4C4]
-
-        bg-[#F8F4EC]/95
-
-        shadow-[0_12px_35px_rgba(67,35,28,0.08)]
-
-        backdrop-blur-2xl
-
-        animate-[sirrahaSearchOpen_0.35s_ease-out]
-
-        [scrollbar-width:thin]
-        [scrollbar-color:#C8A15A_transparent]
+  relative
+  w-full
+  max-h-[calc(100vh-100px)]
+  overflow-x-hidden
+  overflow-y-auto
+  overscroll-contain
+  border-b
+  border-white/40
+  bg-[#F8F4F0]/75
+  shadow-[0_8px_30px_rgba(53,20,17,0.08)]
+  backdrop-blur-2xl
+  animate-[sirrahaSearchOpen_0.25s_ease-out]
+  [scrollbar-width:thin]
+  [scrollbar-color:#C8A15A_transparent]
+  sm:max-h-[calc(100vh-110px)]
+  md:max-h-[calc(100vh-145px)]
       "
       style={{
         WebkitOverflowScrolling: "touch",
         overscrollBehavior: "contain",
-        touchAction: "pan-y",
       }}
     >
-      {/* =====================================================
-          SOFT DECORATIVE BLUR
-      ===================================================== */}
+      {/* ======================================================
+          FROSTED GLASS BACKGROUND
+      ====================================================== */}
 
       <div
+        aria-hidden="true"
         className="
           pointer-events-none
           absolute
-          -right-20
-          -top-28
-          h-60
-          w-60
-          rounded-full
-          bg-[#C8A15A]/10
-          blur-3xl
+          inset-0
+          -z-10
+          overflow-hidden
         "
-      />
+      >
+        <div
+          className="
+            absolute
+            -right-20
+            -top-24
+            h-56
+            w-56
+            rounded-full
+            bg-[#C8A15A]/10
+            blur-3xl
+          "
+        />
 
-      <div
-        className="
-          pointer-events-none
-          absolute
-          -bottom-32
-          -left-20
-          h-60
-          w-60
-          rounded-full
-          bg-[#5A3026]/5
-          blur-3xl
-        "
-      />
+        <div
+          className="
+            absolute
+            -bottom-24
+            -left-16
+            h-52
+            w-52
+            rounded-full
+            bg-[#4B1F1B]/[0.06]
+            blur-3xl
+          "
+        />
+      </div>
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
+      {/* ======================================================
+          MAIN CONTENT
+      ====================================================== */}
 
       <div
         className="
           relative
           mx-auto
           w-full
-          max-w-[1400px]
-          px-5
-          py-6
-          sm:px-8
-          sm:py-7
-          lg:px-12
-          lg:py-8
-          xl:px-16
+          max-w-[1600px]
+          px-4
+          py-4
+          sm:px-7
+          sm:py-5
+          lg:px-10
+          lg:py-5
+          xl:px-12
         "
       >
-        {/* ===================================================
+        {/* ====================================================
             HEADER
-        =================================================== */}
+        ==================================================== */}
 
-        <div className="flex items-center justify-between">
-          <div>
-            <div
-              className="
-                mb-2
-                flex
-                items-center
-                gap-3
-              "
-            >
-              <span
-                className="
-                  h-px
-                  w-7
-                  bg-[#C8A15A]
-                "
-              />
-
-              <span
-                className="
-                  font-['Poppins']
-                  text-[7px]
-                  font-medium
-                  uppercase
-                  tracking-[3px]
-                  text-[#A98243]
-                  sm:text-[8px]
-                "
-              >
-                Discover Sirraha
-              </span>
-            </div>
-
-            <h2
-              className="
-                font-['Cormorant_Garamond']
-                text-[29px]
-                font-medium
-                leading-none
-                text-[#43231C]
-                sm:text-[35px]
-                lg:text-[40px]
-              "
-            >
-              Search Sirraha
-            </h2>
-          </div>
-
-          {/* CLOSE BUTTON */}
-
+        <div className="mb-3 flex items-center justify-end">
           <button
             type="button"
             onClick={handleClose}
             aria-label="Close search"
             className="
               flex
-              h-9
-              w-9
+              h-8
+              w-8
               shrink-0
               items-center
               justify-center
               rounded-full
               border
-              border-[#DED4C4]
-              bg-[#FFFDF9]/60
-              text-[#5A3026]
+              border-[#E5DDD8]/80
+              bg-white/65
+              text-[#4B1F1B]
               backdrop-blur-md
               transition-all
-              duration-300
+              duration-200
               hover:border-[#C8A15A]
-              hover:bg-[#F2EBDD]
-              sm:h-10
-              sm:w-10
+              hover:bg-white
+              sm:h-9
+              sm:w-9
             "
           >
             <FiX
@@ -469,73 +443,72 @@ function Search({
           </button>
         </div>
 
-        {/* ===================================================
-            SEARCH BAR
-        =================================================== */}
+        {/* ====================================================
+            SEARCH INPUT
+        ==================================================== */}
 
-        <form
-          onSubmit={handleSearch}
-          className="mt-5"
-        >
+        <form onSubmit={handleSearch}>
           <div
             className="
-              flex
-              h-[54px]
-              w-full
-              items-center
-              overflow-hidden
-              rounded-full
-              border
-              border-[#DED4C4]
-              bg-[#FFFDF9]/55
-              shadow-[0_8px_25px_rgba(67,35,28,0.06)]
-              backdrop-blur-xl
-              transition-all
-              duration-300
-              focus-within:border-[#C8A15A]
-              focus-within:bg-[#FFFDF9]/75
-              focus-within:shadow-[0_10px_30px_rgba(67,35,28,0.08)]
-              sm:h-[58px]
+  flex
+  h-[50px]
+  w-full
+  items-center
+  overflow-hidden
+  rounded-full
+  border
+  border-[#C8A15A]/80
+  bg-white/55
+  shadow-[0_5px_20px_rgba(53,20,17,0.05)]
+  backdrop-blur-xl
+  transition-all
+  duration-200
+  focus-within:border-[#A98243]
+  focus-within:bg-white/70
+  sm:h-[54px]
+
             "
           >
+            {/* SEARCH ICON */}
+
             <FiSearch
-              size={19}
-              strokeWidth={1.3}
+              size={20}
+              strokeWidth={1.35}
               className="
-                ml-5
+                ml-4
                 shrink-0
-                text-[#71655B]
+                text-[#6B5651]
                 sm:ml-6
               "
             />
+
+            {/* INPUT */}
 
             <input
               ref={inputRef}
               type="text"
               value={searchText}
-              onChange={(event) =>
-                setSearchText(
-                  event.target.value
-                )
-              }
+              onChange={(event) => {
+                setSearchText(event.target.value);
+              }}
               placeholder="Search kurtis, co-ord sets, suits..."
               aria-label="Search Sirraha"
               className="
                 min-w-0
                 flex-1
                 bg-transparent
-                px-4
-                font-['Poppins']
-                text-[13px]
-                text-[#43231C]
+                px-3
+                font-['Poppins',sans-serif]
+                text-[12px]
+                text-[#351411]
                 outline-none
                 placeholder:text-[#918477]
-                sm:px-5
+                sm:px-4
                 sm:text-[14px]
               "
             />
 
-            {/* CLEAR */}
+            {/* CLEAR BUTTON */}
 
             {searchText && (
               <button
@@ -551,85 +524,80 @@ function Search({
                   items-center
                   justify-center
                   rounded-full
-                  text-[#71655B]
-                  transition-all
-                  hover:bg-[#F2EBDD]
-                  hover:text-[#5A3026]
+                  text-[#6B5651]
+                  transition-colors
+                  hover:bg-white
+                  hover:text-[#4B1F1B]
                 "
               >
                 <FiX size={15} />
               </button>
             )}
 
-            {/* SEARCH BUTTON */}
+            {/* SUBMIT BUTTON */}
 
             <button
               type="submit"
-              aria-label="Search"
+              aria-label="Search products"
               className="
-                mr-1.5
+                mr-1
                 flex
-                h-[43px]
-                w-[43px]
+                h-[40px]
+                w-[40px]
                 shrink-0
                 items-center
                 justify-center
                 rounded-full
-                border
-                border-[#5A3026]
-                bg-[#5A3026]
-                text-[#FFFDF9]
-                transition-all
-                duration-300
-                hover:bg-[#43231C]
-                sm:mr-2
-                sm:h-[46px]
-                sm:w-[46px]
+                bg-[#4B1F1B]
+                text-white
+                transition-colors
+                duration-200
+                hover:bg-[#351411]
+                sm:mr-1.5
+                sm:h-[44px]
+                sm:w-[44px]
               "
             >
               <FiSearch
                 size={17}
-                strokeWidth={1.35}
+                strokeWidth={1.4}
               />
             </button>
           </div>
         </form>
 
-        {/* ===================================================
+        {/* ====================================================
             POPULAR SEARCHES
-        =================================================== */}
+        ==================================================== */}
 
-        <div className="mt-5">
-          <div
-            className="
-              mb-3
-              flex
-              items-center
-              gap-3
-            "
-          >
+        <div className="mt-4">
+          {/* LABEL */}
+
+          <div className="mb-2.5 flex items-center gap-2.5">
             <span
               className="
                 h-px
-                w-7
+                w-6
+                shrink-0
                 bg-[#C8A15A]
               "
             />
 
             <span
               className="
-                font-['Poppins']
-                text-[7px]
+                font-['Poppins',sans-serif]
+                text-[8px]
                 font-medium
                 uppercase
-                tracking-[2.8px]
-                text-[#71655B]
-                sm:text-[8px]
+                tracking-[2px]
+                text-[#6B5651]
               "
             >
               Popular Searches
             </span>
           </div>
+
+          {/* CATEGORY CHIPS */}
 
           <div
             className="
@@ -638,123 +606,124 @@ function Search({
               gap-2
             "
           >
-            {searchCategories.map(
-              (category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() =>
-                    handleCategorySearch(
-                      category
-                    )
-                  }
-                  className="
-                    group
-                    inline-flex
-                    items-center
-                    gap-1.5
-                    rounded-full
-                    border
-                    border-[#DED4C4]
-                    bg-[#FFFDF9]/45
-                    px-3
-                    py-2
-                    font-['Poppins']
-                    text-[7px]
-                    font-medium
-                    uppercase
-                    tracking-[1px]
-                    text-[#5A3026]
-                    backdrop-blur-md
-                    transition-all
-                    duration-300
-                    hover:border-[#C8A15A]
-                    hover:bg-[#FFFDF9]
-                    hover:text-[#43231C]
-                    sm:px-3.5
-                    sm:py-2.5
-                    sm:text-[8px]
-                  "
-                >
-                  {category}
+            {searchCategories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() =>
+                  handleCategorySearch(category)
+                }
+                className="
+                  group
+                  inline-flex
+                  min-h-[30px]
+                  items-center
+                  gap-1.5
+                  rounded-full
+                  border
+                  border-[#E5DDD8]/90
+                  bg-white/45
+                  px-3
+                  py-1.5
+                  font-['Poppins',sans-serif]
+                  text-[8px]
+                  font-medium
+                  uppercase
+                  tracking-[0.65px]
+                  text-[#4B1F1B]
+                  backdrop-blur-md
+                  transition-all
+                  duration-200
+                  hover:border-[#C8A15A]
+                  hover:bg-white/75
+                  hover:text-[#A98243]
+                  sm:min-h-[34px]
+                  sm:px-3.5
+                  sm:text-[9px]
+                  sm:tracking-[0.8px]
+                "
+              >
+                {category}
 
-                  <FiArrowRight
-                    size={10}
-                    strokeWidth={1.4}
-                    className="
-                      text-[#A98243]
-                      transition-transform
-                      duration-300
-                      group-hover:translate-x-0.5
-                    "
-                  />
-                </button>
-              )
-            )}
+                <FiArrowRight
+                  size={11}
+                  strokeWidth={1.4}
+                  className="
+                    shrink-0
+                    text-[#A98243]
+                    transition-transform
+                    duration-200
+                    group-hover:translate-x-0.5
+                  "
+                />
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* ===================================================
+        {/* ====================================================
             SEARCH RESULTS
-        =================================================== */}
+        ==================================================== */}
 
         {query && (
           <div
             className="
-              mt-6
+              mt-5
               border-t
-              border-[#DED4C4]
-              pt-6
-              animate-[sirrahaSearchResults_0.3s_ease-out]
+              border-[#4B1F1B]/10
+              pt-5
+              animate-[sirrahaSearchResults_0.25s_ease-out]
             "
           >
             {/* RESULT HEADER */}
 
             <div
               className="
-                mb-5
+                mb-4
                 flex
                 items-end
                 justify-between
-                gap-4
+                gap-3
               "
             >
               <div>
                 <p
                   className="
                     mb-1
-                    font-['Poppins']
-                    text-[7px]
+                    font-['Poppins',sans-serif]
+                    text-[8px]
                     font-medium
                     uppercase
-                    tracking-[2.5px]
+                    tracking-[2px]
                     text-[#A98243]
                   "
                 >
-                  Search results
+                  Search Results
                 </p>
 
                 <h3
                   className="
-                    font-['Cormorant_Garamond']
-                    text-[27px]
+                    font-['Cormorant_Garamond',serif]
+                    text-[25px]
                     font-medium
-                    leading-none
-                    text-[#43231C]
-                    sm:text-[30px]
+                    leading-tight
+                    text-[#351411]
+                    sm:text-[29px]
                   "
                 >
-                  “{query}”
+                  &ldquo;{query}&rdquo;
                 </h3>
               </div>
 
-              {!loading && (
+              {!loading && !loadError && (
                 <span
                   className="
-                    font-['Poppins']
+                    shrink-0
+                    pb-1
+                    font-['Poppins',sans-serif]
                     text-[8px]
                     uppercase
-                    tracking-[1.3px]
+                    tracking-[1px]
                     text-[#918477]
                   "
                 >
@@ -769,7 +738,7 @@ function Search({
             {/* LOADING */}
 
             {loading && (
-              <div className="py-10 text-center">
+              <div className="py-7 text-center">
                 <div
                   className="
                     mx-auto
@@ -778,7 +747,7 @@ function Search({
                     animate-spin
                     rounded-full
                     border-2
-                    border-[#DED4C4]
+                    border-[#E5DDD8]
                     border-t-[#C8A15A]
                   "
                 />
@@ -786,10 +755,8 @@ function Search({
                 <p
                   className="
                     mt-3
-                    font-['Poppins']
-                    text-[7px]
-                    uppercase
-                    tracking-[2px]
+                    font-['Poppins',sans-serif]
+                    text-[9px]
                     text-[#918477]
                   "
                 >
@@ -798,9 +765,55 @@ function Search({
               </div>
             )}
 
+            {/* API ERROR */}
+
+            {!loading && loadError && (
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-[#E5DDD8]
+                  bg-white/50
+                  px-4
+                  py-6
+                  text-center
+                "
+              >
+                <p
+                  className="
+                    font-['Poppins',sans-serif]
+                    text-[12px]
+                    text-[#4B1F1B]
+                  "
+                >
+                  We couldn&apos;t load products right now.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    requestRef.current = false;
+                    setLoadError(false);
+                  }}
+                  className="
+                    mt-3
+                    font-['Poppins',sans-serif]
+                    text-[10px]
+                    font-medium
+                    text-[#A98243]
+                    underline
+                    underline-offset-4
+                  "
+                >
+                  Please reopen search to try again
+                </button>
+              </div>
+            )}
+
             {/* PRODUCTS */}
 
             {!loading &&
+              !loadError &&
               filteredProducts.length > 0 && (
                 <div
                   className="
@@ -826,8 +839,8 @@ function Search({
                           product.isFeatured
                             ? "best"
                             : product.isNew
-                            ? "new"
-                            : "none"
+                              ? "new"
+                              : "none"
                         }
                       />
                     ))}
@@ -837,35 +850,33 @@ function Search({
             {/* NO RESULTS */}
 
             {!loading &&
+              !loadError &&
               filteredProducts.length === 0 && (
                 <div
                   className="
-                    rounded-2xl
+                    rounded-xl
                     border
-                    border-[#DED4C4]
-                    bg-[#FFFDF9]/55
-                    px-5
-                    py-9
+                    border-[#E5DDD8]/80
+                    bg-white/45
+                    px-4
+                    py-7
                     text-center
                     backdrop-blur-md
                   "
                 >
                   <FiSearch
-                    size={20}
-                    strokeWidth={1.2}
-                    className="
-                      mx-auto
-                      text-[#A98243]
-                    "
+                    size={21}
+                    strokeWidth={1.3}
+                    className="mx-auto text-[#A98243]"
                   />
 
                   <h3
                     className="
-                      mt-4
-                      font-['Cormorant_Garamond']
-                      text-[26px]
+                      mt-3
+                      font-['Cormorant_Garamond',serif]
+                      text-[25px]
                       font-medium
-                      text-[#43231C]
+                      text-[#351411]
                     "
                   >
                     No pieces found
@@ -874,17 +885,16 @@ function Search({
                   <p
                     className="
                       mx-auto
-                      mt-2
-                      max-w-[400px]
-                      font-['Poppins']
-                      text-[9px]
+                      mt-1.5
+                      max-w-[350px]
+                      font-['Poppins',sans-serif]
+                      text-[10px]
                       leading-5
                       text-[#918477]
                     "
                   >
-                    Try another search or
-                    explore one of the popular
-                    categories above.
+                    Try another search or choose one
+                    of the popular categories above.
                   </p>
                 </div>
               )}
@@ -892,15 +902,16 @@ function Search({
             {/* RESULT LIMIT */}
 
             {!loading &&
+              !loadError &&
               filteredProducts.length > 8 && (
                 <p
                   className="
-                    mt-5
+                    mt-4
                     text-center
-                    font-['Poppins']
-                    text-[8px]
+                    font-['Poppins',sans-serif]
+                    text-[9px]
                     uppercase
-                    tracking-[1.5px]
+                    tracking-[1px]
                     text-[#918477]
                   "
                 >

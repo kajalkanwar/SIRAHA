@@ -169,20 +169,20 @@ function CategoryManagement() {
   };
 
   const fieldClass =
-    "mt-2 w-full rounded-lg border border-[#DED4C4] bg-[#FFFDF9] px-3 py-3 text-sm text-[#43231C] outline-none focus:border-[#C8A15A]";
+    "mt-2 w-full rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-3 py-3 text-sm text-[#351411] outline-none focus:border-[#C8A15A]";
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] px-4 py-8 sm:px-7 lg:px-10">
+    <div className="min-h-screen bg-[#FFFFFF] px-4 py-8 sm:px-7 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#A98243]">
               Store Management
             </p>
-            <h1 className="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#43231C] sm:text-5xl">
+            <h1 className="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#351411] sm:text-5xl">
               Categories
             </h1>
-            <p className="mt-2 text-sm text-[#71655B]">
+            <p className="mt-2 text-sm text-[#6B5651]">
               Organise the collections customers can browse.
             </p>
           </div>
@@ -190,7 +190,7 @@ function CategoryManagement() {
           <button
             type="button"
             onClick={loadCategories}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#DED4C4] bg-[#FFFDF9] px-4 py-3 text-xs text-[#5A3026] hover:bg-[#F2EBDD]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E5DDD8] bg-[#FFFFFF] px-4 py-3 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
           >
             <FiRefreshCw size={14} />
             Refresh
@@ -198,7 +198,7 @@ function CategoryManagement() {
         </div>
 
         {message && (
-          <p role="status" className="mb-4 rounded-lg border border-[#D8BD83] bg-[#F7F2E9] p-3 text-sm text-[#5A3026]">
+          <p role="status" className="mb-4 rounded-lg border border-[#D8BD83] bg-[#F7F2E9] p-3 text-sm text-[#4B1F1B]">
             {message}
           </p>
         )}
@@ -212,17 +212,17 @@ function CategoryManagement() {
         <div className="grid items-start gap-6 xl:grid-cols-[0.85fr_1.4fr]">
           <form
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-[#EAE2D5] bg-[#FFFDF9] p-5 sm:p-7"
+            className="rounded-2xl border border-[#F1ECE9] bg-[#FFFFFF] p-5 sm:p-7"
           >
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#A98243]">
               {editingId ? "Edit category" : "New category"}
             </p>
 
-            <h2 className="mt-2 font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="mt-2 font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               {editingId ? "Update details" : "Create a category"}
             </h2>
 
-            <label className="mt-6 block text-xs font-medium text-[#71655B]">
+            <label className="mt-6 block text-xs font-medium text-[#6B5651]">
               Category name *
               <input
                 className={fieldClass}
@@ -234,7 +234,7 @@ function CategoryManagement() {
               />
             </label>
 
-            <label className="mt-4 block text-xs font-medium text-[#71655B]">
+            <label className="mt-4 block text-xs font-medium text-[#6B5651]">
               Description
               <textarea
                 className={fieldClass}
@@ -246,7 +246,7 @@ function CategoryManagement() {
               />
             </label>
 
-            <label className="mt-4 block text-xs font-medium text-[#71655B]">
+            <label className="mt-4 block text-xs font-medium text-[#6B5651]">
               Image URL
               <input
                 className={fieldClass}
@@ -258,7 +258,7 @@ function CategoryManagement() {
             </label>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <label className="block text-xs font-medium text-[#71655B]">
+              <label className="block text-xs font-medium text-[#6B5651]">
                 Sort order
                 <input
                   className={fieldClass}
@@ -269,7 +269,7 @@ function CategoryManagement() {
                 />
               </label>
 
-              <label className="block text-xs font-medium text-[#71655B]">
+              <label className="block text-xs font-medium text-[#6B5651]">
                 Status
                 <select
                   className={fieldClass}
@@ -287,7 +287,7 @@ function CategoryManagement() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#5A3026] px-5 py-3 text-xs font-medium uppercase tracking-[0.12em] text-[#FFFDF9] hover:bg-[#43231C] disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#4B1F1B] px-5 py-3 text-xs font-medium uppercase tracking-[0.12em] text-[#FFFFFF] hover:bg-[#351411] disabled:opacity-50"
               >
                 <FiPlus size={15} />
                 {saving ? "Saving..." : editingId ? "Save changes" : "Create category"}
@@ -297,7 +297,7 @@ function CategoryManagement() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="rounded-lg border border-[#DED4C4] px-4 py-3 text-xs text-[#5A3026] hover:bg-[#F2EBDD]"
+                  className="rounded-lg border border-[#E5DDD8] px-4 py-3 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
                 >
                   Cancel
                 </button>
@@ -305,41 +305,41 @@ function CategoryManagement() {
             </div>
           </form>
 
-          <section className="overflow-hidden rounded-2xl border border-[#EAE2D5] bg-[#FFFDF9]">
-            <div className="flex items-center justify-between border-b border-[#EAE2D5] px-5 py-5 sm:px-6">
+          <section className="overflow-hidden rounded-2xl border border-[#F1ECE9] bg-[#FFFFFF]">
+            <div className="flex items-center justify-between border-b border-[#F1ECE9] px-5 py-5 sm:px-6">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#A98243]">
                   Catalogue
                 </p>
-                <h2 className="mt-1 font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+                <h2 className="mt-1 font-['Cormorant_Garamond'] text-2xl text-[#351411]">
                   All categories
                 </h2>
               </div>
-              <span className="rounded-full bg-[#F2EBDD] px-3 py-1 text-xs text-[#5A3026]">
+              <span className="rounded-full bg-[#FFFFFF] px-3 py-1 text-xs text-[#4B1F1B]">
                 {categories.length}
               </span>
             </div>
 
             {loading ? (
-              <p className="p-8 text-sm text-[#71655B]">Loading categories...</p>
+              <p className="p-8 text-sm text-[#6B5651]">Loading categories...</p>
             ) : categories.length === 0 ? (
               <div className="p-10 text-center">
-                <p className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+                <p className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
                   No categories yet
                 </p>
-                <p className="mt-2 text-sm text-[#71655B]">
+                <p className="mt-2 text-sm text-[#6B5651]">
                   Create your first category using the form.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-[#EAE2D5]">
+              <div className="divide-y divide-[#F1ECE9]">
                 {categories.map((category) => (
                   <div
                     key={category._id}
                     className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6"
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="h-14 w-12 shrink-0 overflow-hidden rounded-lg bg-[#F2EBDD]">
+                      <div className="h-14 w-12 shrink-0 overflow-hidden rounded-lg bg-[#FFFFFF]">
                         {category.image ? (
                           <img
                             src={category.image}
@@ -354,7 +354,7 @@ function CategoryManagement() {
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[#43231C]">
+                        <p className="truncate text-sm font-medium text-[#351411]">
                           {category.name}
                         </p>
                         <p className="mt-1 line-clamp-2 text-xs text-[#918477]">
@@ -362,7 +362,7 @@ function CategoryManagement() {
                         </p>
                         <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wider ${
                           category.status === "active"
-                            ? "bg-[#F2EBDD] text-[#5A3026]"
+                            ? "bg-[#FFFFFF] text-[#4B1F1B]"
                             : "bg-[#F3E2DE] text-[#8C4A3C]"
                         }`}>
                           {category.status}
@@ -374,7 +374,7 @@ function CategoryManagement() {
                       <button
                         type="button"
                         onClick={() => toggleStatus(category)}
-                        className="rounded-lg border border-[#DED4C4] px-3 py-2 text-xs text-[#5A3026] hover:bg-[#F2EBDD]"
+                        className="rounded-lg border border-[#E5DDD8] px-3 py-2 text-xs text-[#4B1F1B] hover:bg-[#FFFFFF]"
                       >
                         {category.status === "active" ? "Deactivate" : "Activate"}
                       </button>
@@ -383,7 +383,7 @@ function CategoryManagement() {
                         type="button"
                         onClick={() => startEditing(category)}
                         aria-label={`Edit ${category.name}`}
-                        className="rounded-lg border border-[#DED4C4] p-2.5 text-[#5A3026] hover:bg-[#F2EBDD]"
+                        className="rounded-lg border border-[#E5DDD8] p-2.5 text-[#4B1F1B] hover:bg-[#FFFFFF]"
                       >
                         <FiEdit2 size={15} />
                       </button>

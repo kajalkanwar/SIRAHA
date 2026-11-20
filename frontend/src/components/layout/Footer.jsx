@@ -1,3 +1,5 @@
+
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -8,1161 +10,93 @@ import {
   FaPhoneAlt,
   FaClock,
   FaMapMarkerAlt,
+  FaChevronDown,
 } from "react-icons/fa";
+
+// ============================================================
+// SIRRAHA PREMIUM FOOTER
+// White background | Burgundy text | Minimal gold accents
+// ============================================================
+
+const shopLinks = [
+  { name: "All Collection", path: "/collection" },
+  { name: "New Arrivals", path: "/collection?type=new-arrivals" },
+  { name: "Best Sellers", path: "/collection?type=best-sellers" },
+];
+
+const policyLinks = [
+  { name: "Privacy Policy", path: "/privacy-policy" },
+  { name: "Exchange Policy", path: "/exchange-policy" },
+  { name: "Terms & Conditions", path: "/terms-and-conditions" },
+  { name: "Shipping Policy", path: "/shipping-policy" },
+];
+
+const helpLinks = [
+  { name: "Track Order", path: "/track-order" },
+];
+
+const CONTACT_PHONE = "917734931418";
+const DISPLAY_PHONE = "+91 7734931418";
+
+const BUSINESS_HOURS = "Mon - Fri · 9:00 AM to 6:00 PM (IST)";
+
+const ADDRESS =
+  "34A - Ram Nagar-A, Toll Tax, Goverdhan Nagar, Jaipur";
+
+const INSTAGRAM_URL =
+  "https://www.instagram.com/sirrahafashion/";
 
 function Footer() {
   const navigate = useNavigate();
 
-  // =========================================================
-  // ENVIRONMENT VARIABLES
-  // =========================================================
+  const [openSection, setOpenSection] = useState(null);
 
   const whatsappNumber =
-    import.meta.env.VITE_WHATSAPP_NUMBER || "";
+    import.meta.env.VITE_WHATSAPP_NUMBER || CONTACT_PHONE;
 
   const sirrahaEmail =
-    import.meta.env.VITE_SIRRAHA_EMAIL || "";
+    import.meta.env.VITE_SIRRAHA_EMAIL || "sirrahafashion@gmail.com";
 
   const facebookUrl =
-    import.meta.env.VITE_FACEBOOK_URL || "#";
+    import.meta.env.VITE_FACEBOOK_URL || "";
 
-  // =========================================================
-  // CONTACT DETAILS
-  // =========================================================
-
-  const contactPhone = "917734931418";
-
-  const displayPhone = "+91 7734931418";
-
-  const businessHours =
-    "Mon - Fri · 9:00 AM to 6:00 PM (IST)";
-
-  const address =
-    "34A - Ram Nagar-A, Toll Tax, Goverdhan Nagar, Jaipur";
-
-  // =========================================================
-  // SHOP LINKS
-  // =========================================================
-
-  const shopLinks = [
-    {
-      name: "All Collection",
-      path: "/collection",
-    },
-    {
-      name: "New Arrivals",
-      path: "/collection?type=new-arrivals",
-    },
-    {
-      name: "Best Sellers",
-      path: "/collection?type=best-sellers",
-    },
-  ];
-
-  // =========================================================
-  // CURRENT SIRRAHA CATEGORIES
-  // =========================================================
-
-  const categoryLinks = [
-    {
-      name: "Short Kurtis",
-      path: "/search?q=Short%20Kurtis",
-    },
-    {
-      name: "Long Kurtis",
-      path: "/search?q=Long%20Kurtis",
-    },
-    {
-      name: "Co-ord Sets",
-      path: "/search?q=Co-ord%20Sets",
-    },
-    {
-      name: "Tops",
-      path: "/search?q=Tops",
-    },
-    {
-      name: "Palazzos",
-      path: "/search?q=Palazzos",
-    },
-    {
-      name: "Farshi Salwar Suit",
-      path: "/search?q=Farshi%20Salwar%20Suit",
-    },
-  ];
-
-  // =========================================================
-  // ACCOUNT
-  // =========================================================
-
-  const handleAccountClick = (event) => {
-    event.preventDefault();
-
-    const storedUser =
-      localStorage.getItem("user");
-
-    if (storedUser) {
-      navigate("/account");
-    } else {
-      navigate("/login");
-    }
-  };
-
-  // =========================================================
-  // CONTACT URLS
-  // =========================================================
-
-  const activeWhatsappNumber =
-    whatsappNumber || contactPhone;
-
-  const whatsappUrl = `https://wa.me/${activeWhatsappNumber.replace(
+  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(
     /\D/g,
     ""
   )}`;
 
-  const phoneUrl = `tel:${contactPhone}`;
+  const phoneUrl = `tel:${CONTACT_PHONE}`;
 
-  const emailUrl = sirrahaEmail
-    ? `mailto:${sirrahaEmail}`
-    : "#";
+  const emailUrl = `mailto:${sirrahaEmail}`;
 
-  const instagramUrl =
-    "https://www.instagram.com/sirrahafashion/";
+  const toggleSection = (section) => {
+    setOpenSection((current) =>
+      current === section ? null : section
+    );
+  };
 
-  return (
-    <footer
-      className="
-        w-full
-        overflow-hidden
-        bg-[#F4EBDD]
-        text-[#59483D]
-      "
-    >
-      {/* =====================================================
-          MAIN FOOTER
-      ===================================================== */}
+  const handleAccountClick = (event) => {
+    event.preventDefault();
 
-      <div
-        className="
-          mx-auto
-          w-full
-          max-w-[1500px]
-          px-5
-          pb-9
-          pt-10
+    const storedUser = localStorage.getItem("user");
 
-          sm:px-8
-          sm:pb-10
-          sm:pt-11
+    navigate(storedUser ? "/account" : "/login");
+  };
 
-          md:px-10
-
-          lg:px-14
-          lg:pb-11
-          lg:pt-12
-
-          xl:px-[74px]
-        "
-      >
-        <div
-          className="
-            grid
-            grid-cols-1
-
-            sm:grid-cols-2
-
-            lg:grid-cols-[1.3fr_0.72fr_0.98fr_0.9fr_1.3fr]
-          "
-        >
-          {/* =================================================
-              BRAND
-          ================================================= */}
-
-          <div
-            className="
-              border-[#D6C4A6]
-              pb-8
-              text-center
-
-              sm:col-span-2
-
-              lg:col-span-1
-              lg:border-r
-              lg:pb-0
-              lg:pr-8
-              lg:text-left
-
-              xl:pr-10
-            "
-          >
-            {/* LOGO */}
-
-            <Link
-              to="/"
-              className="
-                inline-block
-                font-serif
-                text-[29px]
-                font-medium
-                leading-none
-                tracking-[0.28em]
-                text-[#5A3026]
-                transition-colors
-                duration-300
-                hover:text-[#43231C]
-
-                sm:text-[31px]
-
-                lg:text-[32px]
-
-                xl:text-[34px]
-              "
-            >
-              SIRRAHA
-            </Link>
-
-            {/* LOGO ORNAMENT */}
-
-            <div
-              className="
-                mt-3
-                flex
-                items-center
-                justify-center
-                gap-3
-
-                lg:justify-start
-              "
-            >
-              <span
-                className="
-                  h-px
-                  w-[50px]
-                  bg-[#B89559]
-                "
-              />
-
-              <span
-                className="
-                  text-[10px]
-                  text-[#A98243]
-                "
-              >
-                ✦
-              </span>
-
-              <span
-                className="
-                  h-px
-                  w-[50px]
-                  bg-[#B89559]
-                "
-              />
-            </div>
-
-            {/* DESCRIPTION */}
-
-            <p
-              className="
-                mx-auto
-                mt-4
-                max-w-[310px]
-                font-['Poppins']
-                text-[11px]
-                font-normal
-                leading-[1.8]
-                tracking-[0.01em]
-                text-[#71655B]
-
-                lg:mx-0
-                lg:max-w-[300px]
-                lg:text-[11px]
-              "
-            >
-              Thoughtfully crafted ethnic wear rooted
-              in Indian artistry, timeless silhouettes
-              and considered details.
-            </p>
-
-            {/* =================================================
-                SOCIAL MEDIA
-            ================================================= */}
-
-            <div className="mt-6">
-              <p
-                className="
-                  font-['Poppins']
-                  text-[8px]
-                  font-medium
-                  uppercase
-                  tracking-[0.26em]
-                  text-[#8F6B37]
-                "
-              >
-                Follow the Sirraha Edit
-              </p>
-
-              {/* SOCIAL ICONS */}
-
-              <div
-                className="
-                  mt-3
-                  flex
-                  items-center
-                  justify-center
-                  gap-3
-
-                  lg:justify-start
-                "
-              >
-                {/* INSTAGRAM */}
-
-                <a
-                  href={instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Sirraha Instagram"
-                  className="
-                    group
-                    flex
-                    h-[40px]
-                    w-[40px]
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#B89559]
-                    bg-transparent
-                    text-[#5A3026]
-                    transition-all
-                    duration-300
-
-                    hover:-translate-y-1
-                    hover:border-[#C8A15A]
-                    hover:bg-[#C8A15A]
-                    hover:text-[#FFFDF9]
-                  "
-                >
-                  <FaInstagram
-                    size={16}
-                    className="
-                      text-current
-                      transition-transform
-                      duration-300
-                      group-hover:scale-110
-                    "
-                  />
-                </a>
-
-                {/* WHATSAPP */}
-
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Sirraha WhatsApp"
-                  className="
-                    group
-                    flex
-                    h-[40px]
-                    w-[40px]
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#B89559]
-                    bg-transparent
-                    text-[#5A3026]
-                    transition-all
-                    duration-300
-
-                    hover:-translate-y-1
-                    hover:border-[#C8A15A]
-                    hover:bg-[#C8A15A]
-                    hover:text-[#FFFDF9]
-                  "
-                >
-                  <FaWhatsapp
-                    size={17}
-                    className="
-                      text-current
-                      transition-transform
-                      duration-300
-                      group-hover:scale-110
-                    "
-                  />
-                </a>
-
-                {/* EMAIL */}
-
-                <a
-                  href={emailUrl}
-                  aria-label="Email Sirraha"
-                  className="
-                    group
-                    flex
-                    h-[40px]
-                    w-[40px]
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#B89559]
-                    bg-transparent
-                    text-[#5A3026]
-                    transition-all
-                    duration-300
-
-                    hover:-translate-y-1
-                    hover:border-[#C8A15A]
-                    hover:bg-[#C8A15A]
-                    hover:text-[#FFFDF9]
-                  "
-                >
-                  <FaEnvelope
-                    size={15}
-                    className="
-                      text-current
-                      transition-transform
-                      duration-300
-                      group-hover:scale-110
-                    "
-                  />
-                </a>
-
-                {/* FACEBOOK */}
-
-                <a
-                  href={facebookUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Sirraha Facebook"
-                  onClick={(event) => {
-                    if (facebookUrl === "#") {
-                      event.preventDefault();
-                    }
-                  }}
-                  className={`
-                    group
-                    flex
-                    h-[40px]
-                    w-[40px]
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#B89559]
-                    bg-transparent
-                    text-[#5A3026]
-                    transition-all
-                    duration-300
-
-                    hover:-translate-y-1
-                    hover:border-[#C8A15A]
-                    hover:bg-[#C8A15A]
-                    hover:text-[#FFFDF9]
-
-                    ${
-                      facebookUrl === "#"
-                        ? "cursor-default opacity-70"
-                        : ""
-                    }
-                  `}
-                >
-                  <FaFacebookF
-                    size={14}
-                    className="
-                      text-current
-                      transition-transform
-                      duration-300
-                      group-hover:scale-110
-                    "
-                  />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* =================================================
-              SHOP
-          ================================================= */}
-
-          <div
-            className="
-              border-t
-              border-[#D6C4A6]
-              px-5
-              py-7
-              text-center
-
-              sm:border-t-0
-              sm:px-6
-
-              lg:border-r
-              lg:px-6
-              lg:py-0
-              lg:text-left
-            "
-          >
-            <FooterHeading>
-              Shop
-            </FooterHeading>
-
-            <FooterLinks
-              items={shopLinks}
-            />
-          </div>
-
-          {/* =================================================
-              CATEGORIES
-          ================================================= */}
-
-          <div
-            className="
-              border-t
-              border-[#D6C4A6]
-              px-5
-              py-7
-              text-center
-
-              sm:border-t-0
-              sm:px-6
-
-              lg:border-r
-              lg:px-6
-              lg:py-0
-              lg:text-left
-            "
-          >
-            <FooterHeading>
-              Categories
-            </FooterHeading>
-
-            <FooterLinks
-              items={categoryLinks}
-            />
-          </div>
-
-          {/* =================================================
-              HELP
-          ================================================= */}
-
-          <div
-            className="
-              border-t
-              border-[#D6C4A6]
-              px-5
-              py-7
-              text-center
-
-              sm:border-t-0
-              sm:px-6
-
-              lg:border-r
-              lg:px-6
-              lg:py-0
-              lg:text-left
-            "
-          >
-            <FooterHeading>
-              Help
-            </FooterHeading>
-
-            <div
-              className="
-                flex
-                flex-col
-                gap-3.5
-              "
-            >
-              <FooterTextLink to="/track-order">
-                Track Order
-              </FooterTextLink>
-
-              <Link
-                to="/account"
-                onClick={handleAccountClick}
-                className="
-                  text-[11px]
-                  text-[#59483D]
-                  transition-colors
-                  duration-300
-                  hover:text-[#8F6B37]
-                "
-              >
-                My Account
-              </Link>
-
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="
-                  text-[11px]
-                  text-[#59483D]
-                  transition-colors
-                  duration-300
-                  hover:text-[#8F6B37]
-                "
-              >
-                WhatsApp Support
-              </a>
-
-              <a
-                href={phoneUrl}
-                className="
-                  text-[11px]
-                  text-[#59483D]
-                  transition-colors
-                  duration-300
-                  hover:text-[#8F6B37]
-                "
-              >
-                Call Us
-              </a>
-
-              <a
-                href={emailUrl}
-                className="
-                  text-[11px]
-                  text-[#59483D]
-                  transition-colors
-                  duration-300
-                  hover:text-[#8F6B37]
-                "
-              >
-                Email Us
-              </a>
-            </div>
-          </div>
-
-          {/* =================================================
-              CONTACT
-          ================================================= */}
-
-          <div
-            className="
-              border-t
-              border-[#D6C4A6]
-              px-5
-              pt-7
-              text-center
-
-              sm:col-span-2
-              sm:px-8
-
-              lg:col-span-1
-              lg:border-t-0
-              lg:px-7
-              lg:pt-0
-              lg:text-left
-
-              xl:pl-8
-            "
-          >
-            <FooterHeading>
-              Contact
-            </FooterHeading>
-
-            <div
-              className="
-                flex
-                flex-col
-                gap-4
-              "
-            >
-              {/* PHONE */}
-
-              <a
-                href={phoneUrl}
-                className="
-                  group
-                  flex
-                  items-start
-                  gap-3
-                  text-left
-                "
-              >
-                <span
-                  className="
-                    flex
-                    h-[36px]
-                    w-[36px]
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#C8A15A]
-                    bg-[#FFFDF9]/30
-                    text-[#5A3026]
-                    transition-all
-                    duration-300
-
-                    group-hover:bg-[#C8A15A]
-                    group-hover:text-[#FFFDF9]
-                  "
-                >
-                  <FaPhoneAlt
-                    size={12}
-                  />
-                </span>
-
-                <span
-                  className="
-                    pt-1
-                    text-[11px]
-                    leading-5
-                    text-[#59483D]
-                    transition-colors
-                    duration-300
-
-                    group-hover:text-[#8F6B37]
-                  "
-                >
-                  {displayPhone}
-                </span>
-              </a>
-
-              {/* TIMING */}
-
-              <div
-                className="
-                  flex
-                  items-start
-                  gap-3
-                  text-left
-                "
-              >
-                <span
-                  className="
-                    flex
-                    h-[36px]
-                    w-[36px]
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#C8A15A]
-                    bg-[#FFFDF9]/30
-                    text-[#5A3026]
-                  "
-                >
-                  <FaClock
-                    size={13}
-                  />
-                </span>
-
-                <span
-                  className="
-                    pt-1
-                    text-[11px]
-                    leading-5
-                    text-[#59483D]
-                  "
-                >
-                  {businessHours}
-                </span>
-              </div>
-
-              {/* ADDRESS */}
-
-              <div
-                className="
-                  flex
-                  items-start
-                  gap-3
-                  text-left
-                "
-              >
-                <span
-                  className="
-                    flex
-                    h-[36px]
-                    w-[36px]
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-[#C8A15A]
-                    bg-[#FFFDF9]/30
-                    text-[#5A3026]
-                  "
-                >
-                  <FaMapMarkerAlt
-                    size={13}
-                  />
-                </span>
-
-                <span
-                  className="
-                    pt-1
-                    text-[11px]
-                    leading-5
-                    text-[#59483D]
-                  "
-                >
-                  {address}
-                </span>
-              </div>
-
-              {/* EMAIL */}
-
-              {sirrahaEmail && (
-                <a
-                  href={emailUrl}
-                  className="
-                    group
-                    flex
-                    items-start
-                    gap-3
-                    text-left
-                  "
-                >
-                  <span
-                    className="
-                      flex
-                      h-[36px]
-                      w-[36px]
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-full
-                      border
-                      border-[#C8A15A]
-                      bg-[#FFFDF9]/30
-                      text-[#5A3026]
-                      transition-all
-                      duration-300
-
-                      group-hover:bg-[#C8A15A]
-                      group-hover:text-[#FFFDF9]
-                    "
-                  >
-                    <FaEnvelope
-                      size={13}
-                    />
-                  </span>
-
-                  <span
-                    className="
-                      break-all
-                      pt-1
-                      text-[11px]
-                      leading-5
-                      text-[#59483D]
-                      transition-colors
-                      duration-300
-
-                      group-hover:text-[#8F6B37]
-                    "
-                  >
-                    {sirrahaEmail}
-                  </span>
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* =====================================================
-          BOTTOM BROWN STRIP
-      ===================================================== */}
-
-      <div
-        className="
-          w-full
-          bg-[#43231C]
-        "
-      >
-        <div
-          className="
-            mx-auto
-            grid
-            min-h-[68px]
-            w-full
-            max-w-[1500px]
-            grid-cols-1
-            items-center
-            gap-3
-            px-5
-            py-3
-
-            sm:px-8
-
-            md:px-10
-
-            lg:grid-cols-3
-            lg:px-14
-            lg:py-2
-
-            xl:px-[74px]
-          "
-        >
-          {/* COPYRIGHT */}
-
-          <p
-            className="
-              text-center
-              text-[9px]
-              font-normal
-              leading-5
-              !text-[#F4EBDD]
-
-              lg:text-left
-            "
-          >
-            © 2026 Sirraha. All rights reserved.
-          </p>
-
-          {/* CENTER BRAND LINE */}
-
-          <div
-            className="
-              flex
-              flex-col
-              items-center
-            "
-          >
-            <div
-              className="
-                flex
-                w-[120px]
-                items-center
-                gap-2.5
-              "
-            >
-              <span
-                className="
-                  h-px
-                  flex-1
-                  bg-[#B89559]
-                "
-              />
-
-              <span
-                className="
-                  text-[10px]
-                  leading-none
-                  !text-[#D8BD83]
-                "
-              >
-                ✦
-              </span>
-
-              <span
-                className="
-                  h-px
-                  flex-1
-                  bg-[#B89559]
-                "
-              />
-            </div>
-
-            <p
-              className="
-                mt-1
-                text-[7px]
-                font-medium
-                uppercase
-                tracking-[0.30em]
-                !text-[#D8BD83]
-              "
-            >
-              Rooted in Indian Craft
-            </p>
-          </div>
-
-          {/* POLICY LINKS */}
-
-          <nav
-            aria-label="Footer policies"
-            className="
-              flex
-              flex-wrap
-              items-center
-              justify-center
-              gap-x-3
-              gap-y-1.5
-
-              lg:justify-end
-            "
-          >
-            <Link
-              to="/privacy-policy"
-              className="
-                !text-[#F4EBDD]
-                text-[9px]
-                font-medium
-                leading-5
-                no-underline
-                transition-colors
-                duration-300
-                hover:!text-[#D8BD83]
-              "
-            >
-              Privacy Policy
-            </Link>
-
-            <span
-              aria-hidden="true"
-              className="
-                !text-[#C8A15A]
-                text-[9px]
-              "
-            >
-              |
-            </span>
-
-            {/* EXCHANGE POLICY */}
-
-            <Link
-              to="/exchange-policy"
-              className="
-                !text-[#F4EBDD]
-                text-[9px]
-                font-medium
-                leading-5
-                no-underline
-                transition-colors
-                duration-300
-                hover:!text-[#D8BD83]
-              "
-            >
-              Exchange Policy
-            </Link>
-
-            <span
-              aria-hidden="true"
-              className="
-                !text-[#C8A15A]
-                text-[9px]
-              "
-            >
-              |
-            </span>
-
-            {/* TERMS */}
-
-            <Link
-              to="/terms-and-conditions"
-              className="
-                !text-[#F4EBDD]
-                text-[9px]
-                font-medium
-                leading-5
-                no-underline
-                transition-colors
-                duration-300
-                hover:!text-[#D8BD83]
-              "
-            >
-              Terms & Conditions
-            </Link>
-
-            <span
-              aria-hidden="true"
-              className="
-                !text-[#C8A15A]
-                text-[9px]
-              "
-            >
-              |
-            </span>
-
-            {/* SHIPPING */}
-
-            <Link
-              to="/shipping-policy"
-              className="
-                !text-[#F4EBDD]
-                text-[9px]
-                font-medium
-                leading-5
-                no-underline
-                transition-colors
-                duration-300
-                hover:!text-[#D8BD83]
-              "
-            >
-              Shipping Policy
-            </Link>
-          </nav>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-/* =========================================================
-   FOOTER HEADING
-========================================================= */
-
-function FooterHeading({ children }) {
-  return (
-    <div className="mb-5">
-      <h4
-        className="
-          font-serif
-          text-[14px]
-          font-semibold
-          uppercase
-          tracking-[0.20em]
-          !text-[#5A3026]
-        "
-      >
-        {children}
-      </h4>
-
-      <div
-        className="
-          mt-2.5
-          flex
-          justify-center
-
-          lg:justify-start
-        "
-      >
-        <span
-          className="
-            h-[2px]
-            w-[26px]
-            bg-[#A98243]
-          "
-        />
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   FOOTER LINKS
-========================================================= */
-
-function FooterLinks({ items }) {
-  return (
-    <div
-      className="
-        flex
-        flex-col
-        gap-3.5
-      "
-    >
+  const renderLinks = (items) => (
+    <div className="flex flex-col items-start gap-3">
       {items.map((item) => (
         <Link
           key={item.name}
           to={item.path}
           className="
-            text-[11px]
-            !text-[#59483D]
-            no-underline
-            transition-all
-            duration-300
-
-            hover:translate-x-[2px]
-            hover:!text-[#8F6B37]
+            text-left font-['Poppins',sans-serif]
+            text-[12px] leading-[1.65]
+            text-[#59483D] no-underline
+            transition-all duration-200
+            hover:translate-x-0.5 hover:text-[#A98243]
+            focus-visible:outline focus-visible:outline-1
+            focus-visible:outline-[#C8A15A]
           "
         >
           {item.name}
@@ -1170,31 +104,589 @@ function FooterLinks({ items }) {
       ))}
     </div>
   );
+
+  const renderHelpLinks = () => (
+    <div className="flex flex-col items-start gap-3">
+      {helpLinks.map((item) => (
+        <Link
+          key={item.name}
+          to={item.path}
+          className="
+            text-left font-['Poppins',sans-serif]
+            text-[12px] leading-[1.65]
+            text-[#59483D] no-underline
+            transition-colors duration-200
+            hover:text-[#A98243]
+          "
+        >
+          {item.name}
+        </Link>
+      ))}
+
+      <Link
+        to="/account"
+        onClick={handleAccountClick}
+        className="
+          text-left font-['Poppins',sans-serif]
+          text-[12px] leading-[1.65]
+          text-[#59483D] no-underline
+          transition-colors duration-200
+          hover:text-[#A98243]
+        "
+      >
+        My Account
+      </Link>
+
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="
+          font-['Poppins',sans-serif]
+          text-[12px] leading-[1.65]
+          text-[#59483D] no-underline
+          transition-colors duration-200
+          hover:text-[#A98243]
+        "
+      >
+        WhatsApp Support
+      </a>
+
+      <a
+        href={phoneUrl}
+        className="
+          font-['Poppins',sans-serif]
+          text-[12px] leading-[1.65]
+          text-[#59483D] no-underline
+          transition-colors duration-200
+          hover:text-[#A98243]
+        "
+      >
+        Call Us
+      </a>
+
+      <a
+        href={emailUrl}
+        className="
+          font-['Poppins',sans-serif]
+          text-[12px] leading-[1.65]
+          text-[#59483D] no-underline
+          transition-colors duration-200
+          hover:text-[#A98243]
+        "
+      >
+        Email Us
+      </a>
+    </div>
+  );
+
+  // ==========================================================
+  // SOCIAL ICON
+  // ==========================================================
+
+const socialClass = `
+  group
+  flex h-8 w-8 shrink-0
+  items-center justify-center
+  bg-transparent
+  border-0
+  rounded-none
+  text-[#59483D]
+  shadow-none
+  transition-all duration-300 ease-out
+  hover:-translate-y-1
+  hover:bg-transparent
+  hover:text-[#A98243]
+  hover:shadow-none
+  focus-visible:outline
+  focus-visible:outline-2
+  focus-visible:outline-offset-2
+  focus-visible:outline-[#C8A15A]
+  active:translate-y-0
+`;
+
+
+  // ==========================================================
+  // DESKTOP COLUMN HEADING
+  // ==========================================================
+
+  const renderHeading = (title) => (
+    <div className="mb-7">
+      <h3
+        className="
+          font-['Cormorant_Garamond',serif]
+          text-[18px] font-semibold uppercase
+          tracking-[0.18em] text-[#351411]
+        "
+      >
+        {title}
+      </h3>
+
+      <span className="mt-3 block h-[2px] w-[31px] bg-[#B89559]" />
+    </div>
+  );
+
+  // ==========================================================
+  // MOBILE ACCORDION SECTION
+  // ==========================================================
+
+  const renderMobileSection = (title, sectionKey, children) => {
+    const isOpen = openSection === sectionKey;
+
+    return (
+      <div className="border-b border-[#EEE8E2] last:border-b-0">
+        <button
+          type="button"
+          onClick={() => toggleSection(sectionKey)}
+          aria-expanded={isOpen}
+          className="
+            flex min-h-[54px] w-full
+            items-center justify-between gap-4
+            py-3 text-left
+          "
+        >
+          <span
+            className="
+              font-['Cormorant_Garamond',serif]
+              text-[16px] font-semibold uppercase
+              tracking-[0.16em] text-[#351411]
+            "
+          >
+            {title}
+          </span>
+
+          <FaChevronDown
+            size={12}
+            aria-hidden="true"
+            className={`
+              shrink-0 text-[#A98243]
+              transition-transform duration-300
+              ${isOpen ? "rotate-180" : ""}
+            `}
+          />
+        </button>
+
+        <div
+          className={`
+            grid transition-[grid-template-rows,opacity]
+            duration-300 ease-in-out
+            ${
+              isOpen
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }
+          `}
+        >
+          <div className="overflow-hidden">
+            <div className="pb-5 pt-1">{children}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ==========================================================
+  // CONTACT ITEM
+  // ==========================================================
+
+  const contactIconClass = `
+    flex h-[38px] w-[38px] shrink-0
+    items-center justify-center rounded-full
+    border border-[#C8A15A] bg-white
+    text-[#4B1F1B]
+  `;
+
+  const contactTextClass = `
+    min-w-0 break-words
+    font-['Poppins',sans-serif]
+    text-[11px] leading-[1.8]
+    text-[#59483D]
+  `;
+
+  const renderContactDetails = () => (
+    <div className="flex flex-col gap-5">
+      <a
+        href={phoneUrl}
+        className="group flex items-start gap-3 no-underline"
+      >
+        <span className={contactIconClass}>
+          <FaPhoneAlt size={13} />
+        </span>
+
+        <span
+          className={`
+            ${contactTextClass}
+            pt-2 transition-colors
+            group-hover:text-[#A98243]
+          `}
+        >
+          {DISPLAY_PHONE}
+        </span>
+      </a>
+
+      <div className="flex items-start gap-3">
+        <span className={contactIconClass}>
+          <FaClock size={14} />
+        </span>
+
+        <span className={`${contactTextClass} pt-1.5`}>
+         {BUSINESS_HOURS}
+        </span>
+      </div>
+
+      <a
+        href="https://www.google.com/maps/search/?api=1&query=34A+Ram+Nagar-A+Toll+Tax+Goverdhan+Nagar+Jaipur"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-start gap-3 no-underline"
+      >
+        <span className={contactIconClass}>
+          <FaMapMarkerAlt size={14} />
+        </span>
+
+        <span
+          className={`
+            ${contactTextClass}
+            pt-1.5 transition-colors
+            group-hover:text-[#A98243]
+          `}
+        >
+          {ADDRESS}
+        </span>
+      </a>
+
+      <a
+        href={emailUrl}
+        className="group flex items-start gap-3 no-underline"
+      >
+        <span className={contactIconClass}>
+          <FaEnvelope size={14} />
+        </span>
+
+        <span
+          className={`
+            ${contactTextClass}
+            break-all pt-1.5
+            transition-colors
+            group-hover:text-[#A98243]
+          `}
+        >
+          {sirrahaEmail}
+        </span>
+      </a>
+    </div>
+  );
+
+  // ==========================================================
+  // FOOTER
+  // ==========================================================
+
+  return (
+    <footer className="w-full overflow-hidden bg-white text-[#59483D]">
+
+      {/* ======================================================
+          MAIN FOOTER
+      ====================================================== */}
+
+      <div
+        className="
+          mx-auto w-full max-w-[1500px]
+          px-5 pb-7 pt-10
+          sm:px-8 sm:pb-9 sm:pt-12
+          lg:px-10 lg:pb-10 lg:pt-14
+          xl:px-[5.5%]
+        "
+      >
+        {/* ====================================================
+            DESKTOP LAYOUT
+        ==================================================== */}
+
+        <div
+          className="
+            hidden lg:grid
+            grid-cols-[1.55fr_0.8fr_1.05fr_0.95fr_1.25fr]
+            gap-x-8 xl:gap-x-12
+          "
+        >
+          {/* BRAND */}
+
+          <div className="pr-2">
+            <Link
+              to="/"
+              className="
+                inline-block font-['Cormorant_Garamond',serif]
+                text-[40px] font-medium leading-none
+                tracking-[0.24em] text-[#351411]
+                no-underline transition-colors
+                hover:text-[#7B4940]
+                xl:text-[43px]
+              "
+            >
+              SIRRAHA
+            </Link>
+
+            <GoldOrnament />
+
+            <p
+              className="
+                mt-4 max-w-[310px]
+                font-['Cormorant_Garamond',serif]
+                text-[15px] leading-[1.65]
+                text-[#59483D]
+              "
+            >
+              Thoughtfully crafted ethnic wear rooted in
+              Indian artistry, timeless silhouettes and
+              considered details.
+            </p>
+<br></br>
+            <p
+              className="
+                mb-4 mt-8
+                font-['Poppins',sans-serif]
+                text-[9px] font-medium uppercase
+                tracking-[0.22em] text-[#A98243]
+              "
+            >
+              Follow the Sirraha Edit
+            </p>
+
+            <div className="flex items-center gap-3">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Sirraha on Instagram"
+                className={socialClass}
+              >
+                <FaInstagram size={17} />
+              </a>
+
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Sirraha on WhatsApp"
+                className={socialClass}
+              >
+                <FaWhatsapp size={18} />
+              </a>
+
+              <a
+                href={emailUrl}
+                aria-label="Email Sirraha"
+                className={socialClass}
+              >
+                <FaEnvelope size={15} />
+              </a>
+
+              {facebookUrl && (
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Sirraha on Facebook"
+                  className={socialClass}
+                >
+                  <FaFacebookF size={15} />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* SHOP */}
+
+          <div>
+            {renderHeading("Shop")}
+            {renderLinks(shopLinks)}
+          </div>
+
+          {/* POLICIES */}
+
+          <div>
+            {renderHeading("Policies")}
+            {renderLinks(policyLinks)}
+          </div>
+
+          {/* HELP */}
+
+          <div>
+            {renderHeading("Help")}
+            {renderHelpLinks()}
+          </div>
+
+          {/* CONTACT */}
+
+          <div>
+            {renderHeading("Contact")}
+            {renderContactDetails()}
+          </div>
+        </div>
+
+        {/* ====================================================
+            MOBILE AND TABLET LAYOUT
+        ==================================================== */}
+
+        <div className="lg:hidden">
+          {/* BRAND */}
+
+          <div className="pb-8 text-center">
+            <Link
+              to="/"
+              className="
+                inline-block font-['Cormorant_Garamond',serif]
+                text-[34px] font-medium leading-none
+                tracking-[0.25em] text-[#351411]
+                no-underline
+              "
+            >
+              SIRRAHA
+            </Link>
+
+            <GoldOrnament centered />
+
+            <p
+              className="
+                mx-auto mt-4 max-w-[330px]
+                font-['Cormorant_Garamond',serif]
+                text-[15px] leading-[1.7]
+                text-[#59483D]
+              "
+            >
+              Thoughtfully crafted ethnic wear rooted in
+              Indian artistry, timeless silhouettes and
+              considered details.
+            </p>
+
+            <p
+              className="
+                mb-4 mt-7
+                font-['Poppins',sans-serif]
+                text-[9px] font-medium uppercase
+                tracking-[0.22em] text-[#A98243]
+              "
+            >
+              Follow the Sirraha Edit
+            </p>
+
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Sirraha on Instagram"
+                className={socialClass}
+              >
+                <FaInstagram size={17} />
+              </a>
+
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Sirraha on WhatsApp"
+                className={socialClass}
+              >
+                <FaWhatsapp size={18} />
+              </a>
+
+              <a
+                href={emailUrl}
+                aria-label="Email Sirraha"
+                className={socialClass}
+              >
+                <FaEnvelope size={15} />
+              </a>
+
+              {facebookUrl && (
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Sirraha on Facebook"
+                  className={socialClass}
+                >
+                  <FaFacebookF size={15} />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* ACCORDIONS */}
+
+          <div>
+            {renderMobileSection(
+              "Shop",
+              "shop",
+              renderLinks(shopLinks)
+            )}
+
+            {renderMobileSection(
+              "Policies",
+              "policies",
+              renderLinks(policyLinks)
+            )}
+
+            {renderMobileSection(
+              "Help",
+              "help",
+              renderHelpLinks()
+            )}
+
+            {renderMobileSection(
+              "Contact",
+              "contact",
+              renderContactDetails()
+            )}
+          </div>
+        </div>
+
+        {/* ====================================================
+            MINIMAL COPYRIGHT AREA
+            No brown strip. No made-with-love text.
+        ==================================================== */}
+
+        <div className="mt-9 sm:mt-11">
+          <div className="mx-auto h-px w-full max-w-[1100px] bg-[#EEE8E2]" />
+
+          <div className="flex justify-center pt-5">
+            <p
+              className="
+                text-center
+                font-['Poppins',sans-serif]
+                text-[9px] tracking-[0.12em]
+                text-[#6B5651]
+                sm:text-[10px]
+              "
+            >
+              © {new Date().getFullYear()} Sirraha. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
-/* =========================================================
-   FOOTER TEXT LINK
-========================================================= */
+// ============================================================
+// GOLD ORNAMENT
+// ============================================================
 
-function FooterTextLink({
-  to,
-  children,
-}) {
+function GoldOrnament({ centered = false }) {
   return (
-    <Link
-      to={to}
-      className="
-        text-[11px]
-        !text-[#59483D]
-        no-underline
-        transition-colors
-        duration-300
-
-        hover:!text-[#8F6B37]
-      "
+    <div
+      aria-hidden="true"
+      className={`
+        mt-3 flex items-center gap-2.5
+        ${centered ? "justify-center" : "justify-start"}
+      `}
     >
-      {children}
-    </Link>
+      <span className="h-px w-[44px] bg-[#B89559]" />
+      <span className="text-[11px] leading-none text-[#A98243]">
+        ✦
+      </span>
+      <span className="h-px w-[44px] bg-[#B89559]" />
+    </div>
   );
 }
 

@@ -4,8 +4,8 @@ function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
-    <main className="min-h-screen bg-[#FAF7F0] text-[#3A2A20]">
-      <section className="border-b border-[#DED4C4]">
+    <main className="min-h-screen bg-[#FFFFFF] text-[#351C19]">
+      <section className="border-b border-[#E5DDD8]">
         <div className="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-16">
           <button
             type="button"
@@ -18,7 +18,7 @@ function PrivacyPolicy() {
               uppercase
               tracking-[2px]
               text-[#A98243]
-              hover:text-[#5A3026]
+              hover:text-[#4B1F1B]
             "
           >
             ← Back
@@ -43,14 +43,14 @@ function PrivacyPolicy() {
               font-['Cormorant_Garamond']
               text-[42px]
               font-normal
-              text-[#43231C]
+              text-[#351411]
               sm:text-[50px]
             "
           >
             Privacy Policy
           </h1>
 
-          <p className="mt-3 text-sm text-[#71655B]">
+          <p className="mt-3 text-sm text-[#6B5651]">
               
               This Privacy Policy describes how Sirraha (the “Site” or “we”) collects, uses, 
               and discloses your Personal Information when you visit or make a purchase from the Site.
@@ -70,11 +70,11 @@ function PrivacyPolicy() {
       <section className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
         <div className="space-y-8">
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               1. Information We Collect
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
               Depending on how you use Sirraha, we may
               collect information such as:
             name, billing address, shipping address, 
@@ -89,11 +89,11 @@ function PrivacyPolicy() {
           </div>
 
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               2. OTP Authentication
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
              Sirraha uses one-time passwords (OTPs) to securely verify your identity 
              when you sign in or access your account.
               Depending on the option you choose, an OTP may be sent to your 
@@ -107,11 +107,11 @@ function PrivacyPolicy() {
           </div>
 
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               3. How We Use Information
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
               Information may be used to process orders,
               provide customer support, manage your account,
               communicate important order updates and
@@ -120,11 +120,11 @@ function PrivacyPolicy() {
           </div>
 
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               4. Order and Delivery Information
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
               Delivery information may be shared with
               relevant shipping or service providers when
               necessary to fulfil your order.
@@ -132,11 +132,11 @@ function PrivacyPolicy() {
           </div>
 
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               5. Data Security
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
               Sirraha takes reasonable measures to protect
               customer information. However, no online
               transmission or storage system can be
@@ -145,28 +145,28 @@ function PrivacyPolicy() {
           </div>
 
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               6. Third-party OTP services
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
               Sirraha may work with trusted third-party service providers to deliver authentication messages, emails, payments, shipping services, and other essential services. These providers may process limited information as required to perform their services and are expected to maintain appropriate security measures.
             </p>
           </div>
 
           <div>
-            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#43231C]">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl text-[#351411]">
               7. Policy Updates
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[#71655B]">
+            <p className="mt-3 text-sm leading-7 text-[#6B5651]">
               This Privacy Policy may be updated from time
               to time to reflect changes to the Sirraha
               website, services or applicable requirements.
             </p>
           </div>
 
-          <div className="border-t border-[#DED4C4] pt-6">
+          <div className="border-t border-[#E5DDD8] pt-6">
             <p className="text-xs leading-6 text-[#918477]">
               This is general privacy-policy wording for
               the Sirraha website. Before the commercial

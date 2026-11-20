@@ -7,8 +7,8 @@ function AdminStatCard({
 }) {
   const accentStyles = {
     brown: {
-      iconBg: "bg-[#F2EBDD]",
-      iconColor: "text-[#5A3026]",
+      iconBg: "bg-[#FFFFFF]",
+      iconColor: "text-[#4B1F1B]",
     },
 
     gold: {
@@ -18,7 +18,7 @@ function AdminStatCard({
 
     cream: {
       iconBg: "bg-[#F7F3EC]",
-      iconColor: "text-[#795033]",
+      iconColor: "text-[#69352D]",
     },
 
     danger: {
@@ -34,8 +34,8 @@ function AdminStatCard({
     <div
       className="
         border
-        border-[#EAE2D5]
-        bg-[#FFFDF9]
+        border-[#F1ECE9]
+        bg-[#FFFFFF]
         p-5
         shadow-[0_8px_30px_rgba(67,35,28,0.035)]
         transition
@@ -68,7 +68,7 @@ function AdminStatCard({
               font-serif
               text-3xl
               font-medium
-              text-[#43231C]
+              text-[#351411]
               sm:text-[34px]
             "
           >
@@ -99,7 +99,7 @@ function AdminStatCard({
           className="
             mt-4
             border-t
-            border-[#EAE2D5]
+            border-[#F1ECE9]
             pt-3
             text-[11px]
             leading-relaxed

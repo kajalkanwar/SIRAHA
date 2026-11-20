@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -6,25 +7,34 @@ import {
   getOrderById,
   updateOrderStatus,
   trackOrder,
+  updateShippingDetails,
 } from "../controllers/orderController.js";
 
-import { protectAdmin } from "../middleware/adminMiddleware.js";
+import {
+  protect,
+  adminOnly,
+} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Customer creates an order
+// Customer checkout
 router.post("/", createOrder);
 
-// Only admin can view all orders
-router.get("/", protectAdmin, getOrders);
-
-// Customer tracks an order
+// Customer order tracking
 router.get("/track", trackOrder);
 
-// Only admin can view one order
-router.get("/:id", protectAdmin, getOrderById);
+// Admin-only order management
+router.get("/", protect, adminOnly, getOrders);
 
-// Only admin can update order status
-router.put("/:id/status", protectAdmin, updateOrderStatus);
+router.get("/:id", protect, adminOnly, getOrderById);
+
+router.put(
+  "/:id/status",
+  protect,
+  adminOnly,
+  updateOrderStatus
+);
+
+router.patch("/:id/shipping", protect, adminOnly, updateShippingDetails);
 
 export default router;

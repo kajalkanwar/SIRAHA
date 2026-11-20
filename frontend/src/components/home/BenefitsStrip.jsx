@@ -35,8 +35,8 @@ function BenefitsStrip() {
         hidden
         w-full
         border-b
-        border-[#DED4C4]/70
-        bg-[#FFFDF9]/70
+        border-[#E5DDD8]/70
+        bg-[#FFFFFF]/70
         backdrop-blur-md
 
         lg:block
@@ -69,7 +69,7 @@ function BenefitsStrip() {
 
                 ${
                   index !== 3
-                    ? "border-r border-[#DED4C4]/70"
+                    ? "border-r border-[#E5DDD8]/70"
                     : ""
                 }
               `}
@@ -89,7 +89,7 @@ function BenefitsStrip() {
                   rounded-full
                   border
                   border-[#C8A15A]/40
-                  bg-[#FAF7F0]/70
+                  bg-[#FFFFFF]/70
                   text-[#A98243]
 
                   xl:h-10
@@ -115,7 +115,7 @@ function BenefitsStrip() {
                     uppercase
                     leading-none
                     tracking-[1.4px]
-                    text-[#5A3026]
+                    text-[#4B1F1B]
 
                     xl:text-[12px]
                   "
@@ -130,7 +130,7 @@ function BenefitsStrip() {
                     font-['Poppins']
                     text-[7px]
                     leading-4
-                    text-[#71655B]
+                    text-[#6B5651]
 
                     xl:text-[8px]
                   "

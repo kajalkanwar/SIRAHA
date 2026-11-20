@@ -264,7 +264,7 @@ function SavedAddresses() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8F4EC]">
+      <div className="flex min-h-screen items-center justify-center bg-[#FFFFFF]">
         <p className="text-sm uppercase tracking-[0.2em] text-[#0E5B3B]">
           Loading addresses...
         </p>
@@ -273,7 +273,7 @@ function SavedAddresses() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F4EC] px-5 py-10 sm:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#FFFFFF] px-5 py-10 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-6xl">
 
         {/* ==========================================
@@ -372,7 +372,7 @@ function SavedAddresses() {
                 {/* Default Badge */}
 
                 {savedAddress.isDefault && (
-                  <span className="absolute right-5 top-5 bg-[#F8F4EC] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.15em] text-[#0E5B3B]">
+                  <span className="absolute right-5 top-5 bg-[#FFFFFF] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.15em] text-[#0E5B3B]">
                     Default
                   </span>
                 )}
@@ -381,7 +381,7 @@ function SavedAddresses() {
 
                 <div className="pr-20">
                   <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F8F4EC] text-[#0E5B3B]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFFFF] text-[#0E5B3B]">
                       <FiMapPin size={18} />
                     </div>
 

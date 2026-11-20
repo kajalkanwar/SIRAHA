@@ -2,7 +2,7 @@ import sirrahaFabric from "../../assets/images/sirraha-fabric.jpg";
 
 function CraftedSection() {
   return (
-    <section className="w-full m-0 p-0 bg-[#43231C]">
+    <section className="w-full m-0 p-0 bg-[#351411]">
       <div
         className="
           grid
@@ -19,7 +19,7 @@ function CraftedSection() {
             flex
             min-h-[330px]
             items-center
-            bg-[#43231C]
+            bg-[#351411]
             px-7
             py-12
             sm:min-h-[360px]
@@ -79,7 +79,7 @@ function CraftedSection() {
                 font-normal
                 leading-[0.94]
                 tracking-[-0.5px]
-                text-[#FFFDF9]
+                text-[#FFFFFF]
                 sm:text-[46px]
                 md:text-[50px]
                 lg:text-[48px]

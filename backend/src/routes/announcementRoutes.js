@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -13,45 +14,16 @@ import { adminOnly } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-/*
-  Public
-  Customers can see active announcements
-  without logging in.
-*/
-router.get(
-  "/active",
-  getActiveAnnouncements
-);
+// Public: customers can view active announcements without logging in.
+router.get("/active", getActiveAnnouncements);
 
-/*
-  Admin
-*/
-router.get(
-  "/",
-  protect,
-  adminOnly,
-  getAllAnnouncements
-);
+// Admin-only: all management operations require authentication.
+router.get("/", protect, adminOnly, getAllAnnouncements);
 
-router.post(
-  "/",
-  protect,
-  adminOnly,
-  createAnnouncement
-);
+router.post("/", protect, adminOnly, createAnnouncement);
 
-router.put(
-  "/:id",
-  protect,
-  adminOnly,
-  updateAnnouncement
-);
+router.put("/:id", protect, adminOnly, updateAnnouncement);
 
-router.delete(
-  "/:id",
-  protect,
-  adminOnly,
-  deleteAnnouncement
-);
+router.delete("/:id", protect, adminOnly, deleteAnnouncement);
 
 export default router;

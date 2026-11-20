@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema(
@@ -96,10 +97,8 @@ const orderSchema = new mongoose.Schema(
       type: [orderItemSchema],
       required: true,
       validate: {
-        validator: (items) =>
-          items.length > 0,
-        message:
-          "Order must contain at least one item.",
+        validator: (items) => items.length > 0,
+        message: "Order must contain at least one item.",
       },
     },
 
@@ -121,6 +120,13 @@ const orderSchema = new mongoose.Schema(
       min: 0,
     },
 
+    couponCode: {
+  type: String,
+  default: "",
+  trim: true,
+  uppercase: true,
+},
+
     total: {
       type: Number,
       required: true,
@@ -129,21 +135,13 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: [
-        "COD",
-        "RAZORPAY",
-      ],
+      enum: ["COD", "RAZORPAY"],
       default: "COD",
     },
 
     paymentStatus: {
       type: String,
-      enum: [
-        "PENDING",
-        "PAID",
-        "FAILED",
-        "REFUNDED",
-      ],
+      enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
       default: "PENDING",
     },
 
@@ -160,6 +158,11 @@ const orderSchema = new mongoose.Schema(
       default: "PENDING",
     },
 
+    deliveredAt: {
+  type: Date,
+  default: null,
+},
+
     razorpayOrderId: {
       type: String,
       default: null,
@@ -169,15 +172,36 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    // Shipping and courier details
+    courierPartner: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    trackingNumber: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    trackingUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    expectedDelivery: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Order = mongoose.model(
-  "Order",
-  orderSchema
-);
+const Order = mongoose.model("Order", orderSchema);
 
 export default Order;

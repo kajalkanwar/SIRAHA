@@ -1,643 +1,383 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  SlidersHorizontal,
-} from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 
 import { getProducts } from "../../constants/api";
-import ProductCard from "../product/ProductCard";
+import ProductCard from "../../components/product/ProductCard";
 
-const categories = [
-  "ALL COLLECTION",
-  "SHORT KURTIS",
-  "LONG KURTIS",
-  "CO-ORD SETS",
-  "TOPS",
-  "PALAZZOS",
-  "FARSHI SALWAR",
-];
+function BestSellersPage() {
+  const [products, setProducts] = useState([]);
+  const [sortBy, setSortBy] = useState("newest");
+  const [loading, setLoading] = useState(true);
 
-const categoryAliases = {
-  "SHORT KURTIS": [
-    "short kurtis",
-    "short kurti",
-  ],
-
-  "LONG KURTIS": [
-    "long kurtis",
-    "long kurti",
-  ],
-
-  "CO-ORD SETS": [
-    "co-ord sets",
-    "co ord sets",
-    "coord sets",
-  ],
-
-  TOPS: [
-    "tops",
-    "top",
-  ],
-
-  PALAZZOS: [
-    "palazzos",
-    "palazzo",
-    "trousers",
-    "trouser",
-  ],
-
-  "FARSHI SALWAR": [
-    "farshi salwar",
-    "farshi salwar suit",
-    "farshi",
-  ],
-};
-
-function BestSellers() {
-  const [products, setProducts] =
-    useState([]);
-
-  const [selectedCategory, setSelectedCategory] =
-    useState("ALL COLLECTION");
-
-  const [sortBy, setSortBy] =
-    useState("newest");
-
-  const [loading, setLoading] =
-    useState(true);
-
-  // ============================================================
-  // FETCH
-  // ============================================================
+  // =========================================================
+  // FETCH BEST SELLERS
+  // =========================================================
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchBestSellers = async () => {
       try {
         setLoading(true);
 
         const data = await getProducts();
 
-        const featuredProducts =
-          data.filter(
-            (product) =>
-              product.isFeatured === true &&
-              product.status !== "inactive"
-          );
+        if (!isMounted) return;
+
+        const productList = Array.isArray(data) ? data : [];
+
+        const featuredProducts = productList.filter(
+          (product) =>
+            product.isFeatured === true &&
+            product.status !== "inactive"
+        );
 
         setProducts(featuredProducts);
       } catch (error) {
-        console.error(
-          "Failed to fetch best sellers:",
-          error
-        );
+        console.error("Failed to fetch best sellers:", error);
 
-        setProducts([]);
+        if (isMounted) {
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchBestSellers();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // ============================================================
-  // FILTER + SORT
-  // ============================================================
+  // =========================================================
+  // SORT PRODUCTS
+  // =========================================================
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
+  const sortedProducts = useMemo(() => {
+    const result = [...products];
 
-    if (
-      selectedCategory !==
-      "ALL COLLECTION"
-    ) {
-      const allowedCategories =
-        categoryAliases[
-          selectedCategory
-        ] || [];
-
-      result = result.filter(
-        (product) => {
-          const category =
-            product.category
-              ?.trim()
-              .toLowerCase();
-
-          return allowedCategories.includes(
-            category
-          );
-        }
-      );
-    }
+    const getPrice = (product) =>
+      Number(product.salePrice ?? product.price ?? 0);
 
     if (sortBy === "newest") {
       result.sort(
         (a, b) =>
-          new Date(
-            b.createdAt || 0
-          ) -
-          new Date(
-            a.createdAt || 0
-          )
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
       );
-    }
-
-    if (sortBy === "price-low") {
-      result.sort(
-        (a, b) =>
-          Number(
-            a.salePrice ??
-              a.price ??
-              0
-          ) -
-          Number(
-            b.salePrice ??
-              b.price ??
-              0
-          )
-      );
-    }
-
-    if (sortBy === "price-high") {
-      result.sort(
-        (a, b) =>
-          Number(
-            b.salePrice ??
-              b.price ??
-              0
-          ) -
-          Number(
-            a.salePrice ??
-              a.price ??
-              0
-          )
-      );
+    } else if (sortBy === "price-low") {
+      result.sort((a, b) => getPrice(a) - getPrice(b));
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => getPrice(b) - getPrice(a));
     }
 
     return result;
-  }, [
-    products,
-    selectedCategory,
-    sortBy,
-  ]);
+  }, [products, sortBy]);
+
+  // =========================================================
+  // SORT OPTIONS
+  // =========================================================
+
+  const sortOptions = [
+    { value: "newest", label: "Newest" },
+    { value: "price-high", label: "Price: High to Low" },
+    { value: "price-low", label: "Price: Low to High" },
+  ];
 
   return (
-    <section
-      className="
-        w-full
-        bg-[#FAF7F0]
-        text-[#3A2A20]
-      "
-    >
+    <main className="min-h-screen w-full bg-white text-[#351C19]">
       <div
         className="
-          mx-auto
-          w-full
-          max-w-[1500px]
-
-          px-5
-          py-10
-
-          sm:px-8
-          sm:py-12
-
-          lg:px-14
-          lg:py-14
-
-          xl:px-16
+          mx-auto w-full max-w-[1440px]
+          px-4 py-8
+          sm:px-6 sm:py-10
+          md:px-8 md:py-12
+          lg:px-10 lg:py-14
+          xl:px-12
         "
       >
-        {/* ====================================================
-            HEADER
+        {/* =====================================================
+            HEADER AND SORTING
         ===================================================== */}
 
         <div
           className="
-            flex
-            flex-col
-            gap-5
-
-            lg:flex-row
-            lg:items-end
-            lg:justify-between
+            mb-6 flex flex-col gap-4
+            sm:mb-7
+            md:flex-row md:items-end md:justify-between
           "
         >
-          <div>
-            <div
-              className="
-                mb-2
-                flex
-                items-center
-                gap-3
-              "
-            >
-              <span
-                className="
-                  h-px
-                  w-8
-                  bg-[#C8A15A]
-                "
-              />
+          {/* SECTION TITLE */}
+
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center gap-2.5">
+              <span className="h-px w-7 bg-[#C8A15A]" />
 
               <p
                 className="
-                  font-['Poppins']
-                  text-[8px]
-                  uppercase
-                  tracking-[3px]
-                  text-[#A98243]
+                  font-['Poppins',sans-serif]
+                  text-[8px] font-medium uppercase
+                  tracking-[2.5px] text-[#A98243]
+                  sm:text-[9px]
                 "
               >
                 Most Loved
               </p>
             </div>
 
-            <h2
+            <h1
               className="
-                font-['Cormorant_Garamond']
-                text-[38px]
-                font-normal
-                leading-none
-                text-[#43231C]
-
-                sm:text-[44px]
-
-                lg:text-[50px]
+                font-['Cormorant_Garamond',serif]
+                text-[36px] font-medium leading-none
+                tracking-[-0.4px] text-[#351411]
+                sm:text-[43px]
+                md:text-[48px]
+                lg:text-[52px]
               "
             >
               Best Sellers
-            </h2>
+            </h1>
 
-            <div
-              className="
-                mt-3
-                h-px
-                w-9
-                bg-[#C8A15A]
-              "
-            />
+            <div className="mt-3 h-px w-9 bg-[#C8A15A]" />
 
             <p
               className="
-                mt-2
-                font-['Cormorant_Garamond']
-                text-[14px]
-                italic
-                leading-5
-                text-[#71655B]
-
+                mt-2 max-w-[440px]
+                font-['Cormorant_Garamond',serif]
+                text-[14px] italic leading-5
+                text-[#6B5651]
                 sm:text-[15px]
               "
             >
-              Timeless pieces, loved and chosen
-              again and again.
+              Timeless pieces, loved and chosen again and again.
             </p>
           </div>
 
-          {/* COUNT + SORT */}
+          {/* PRODUCT COUNT AND SORT */}
 
           <div
             className="
-              flex
-              items-center
-              justify-between
-              gap-3
-
-              sm:justify-end
+              flex w-full items-center justify-between gap-3
+              md:w-auto md:justify-end md:pb-0.5
             "
           >
-            <div
-              className="
-                flex
-                items-center
-                gap-2
+            {/* PRODUCT COUNT */}
 
-                font-['Poppins']
-                text-[8px]
-                uppercase
-                tracking-[1.8px]
-                text-[#A98243]
+            <p
+              className="
+                shrink-0 whitespace-nowrap
+                font-['Poppins',sans-serif]
+                text-[9px] font-medium uppercase
+                tracking-[1.2px] text-[#6B5651]
+                sm:text-[10px]
               "
             >
-              <SlidersHorizontal
-                size={12}
-                strokeWidth={1.3}
-              />
+              <span className="text-[#4B1F1B]">
+                {loading ? "—" : sortedProducts.length}
+              </span>{" "}
+              {sortedProducts.length === 1 ? "Piece" : "Pieces"}
+            </p>
 
-              <span>
-                {filteredProducts.length}{" "}
-                {filteredProducts.length === 1
-                  ? "Piece"
-                  : "Pieces"}
-              </span>
-            </div>
+            {/* SORT SELECT */}
 
-            <div className="relative">
+            <div className="relative shrink-0">
+              <label htmlFor="best-sellers-sort" className="sr-only">
+                Sort best sellers
+              </label>
+
               <select
+                id="best-sellers-sort"
                 value={sortBy}
-                onChange={(event) =>
-                  setSortBy(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setSortBy(event.target.value)}
                 className="
-                  h-[40px]
-                  min-w-[125px]
-
-                  appearance-none
-
-                  border
-                  border-[#DED4C4]
-
-                  bg-[#FFFDF9]
-
-                  px-3
-                  pr-8
-
-                  font-['Poppins']
-                  text-[8px]
-                  uppercase
-                  tracking-[1.5px]
-                  text-[#5A3026]
-
-                  outline-none
-
-                  focus:border-[#C8A15A]
+                  h-9 w-[164px] appearance-none
+                  rounded-none border border-[#E5DDD8]
+                  bg-white py-0 pl-3 pr-8
+                  font-['Poppins',sans-serif]
+                  text-[9px] font-medium
+                  text-[#4B1F1B]
+                  outline-none transition-colors
+                  hover:border-[#C8A15A]
+                  focus:border-[#A98243]
+                  sm:h-10 sm:w-[190px] sm:pl-4
+                  sm:text-[10px]
                 "
               >
-                <option value="newest">
-                  Newest
-                </option>
-
-                <option value="price-low">
-                  Price: Low to High
-                </option>
-
-                <option value="price-high">
-                  Price: High to Low
-                </option>
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
 
-              <span
+              <ChevronDown
+                size={14}
+                strokeWidth={1.4}
+                aria-hidden="true"
                 className="
-                  pointer-events-none
-                  absolute
-                  right-3
-                  top-1/2
-                  -translate-y-1/2
+                  pointer-events-none absolute
+                  right-2.5 top-1/2 -translate-y-1/2
                   text-[#A98243]
                 "
-              >
-                ↓
-              </span>
+              />
             </div>
           </div>
         </div>
 
-        {/* ====================================================
-            CATEGORIES
+        {/* =====================================================
+            LOADING PLACEHOLDERS
         ===================================================== */}
 
-        <div
-          className="
-            mt-6
-            w-full
-            overflow-hidden
-
-            border-b
-            border-[#DED4C4]
-
-            pb-4
-          "
-        >
+        {loading && (
           <div
             className="
-              flex
-              w-full
-              gap-2
-
-              overflow-x-auto
-
-              pb-1
-
-              [-ms-overflow-style:none]
-              [scrollbar-width:none]
-              [&::-webkit-scrollbar]:hidden
+              grid grid-cols-2 gap-x-3 gap-y-6
+              sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8
+              lg:grid-cols-4 lg:gap-x-6 lg:gap-y-9
             "
           >
-            {categories.map(
-              (category) => {
-                const active =
-                  selectedCategory ===
-                  category;
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="w-full animate-pulse">
+                <div className="aspect-[4/5] bg-[#F7F3EF]" />
 
-                return (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() =>
-                      setSelectedCategory(
-                        category
-                      )
-                    }
-                    className={`
-                      shrink-0
-                      whitespace-nowrap
-
-                      border
-
-                      px-4
-                      py-2.5
-
-                      font-['Poppins']
-                      text-[7px]
-                      font-medium
-                      uppercase
-                      tracking-[1.5px]
-
-                      transition-all
-                      duration-300
-
-                      sm:px-5
-
-                      ${
-                        active
-                          ? "border-[#5A3026] bg-[#5A3026] text-[#FFFDF9]"
-                          : "border-[#DED4C4] bg-[#FFFDF9] text-[#5A3026] hover:border-[#C8A15A]"
-                      }
-                    `}
-                  >
-                    {category}
-                  </button>
-                );
-              }
-            )}
+                <div className="pt-3 sm:pt-4">
+                  <div className="h-2 w-16 bg-[#E5DDD8]" />
+                  <div className="mt-3 h-3 w-3/4 bg-[#F1ECE9]" />
+                  <div className="mt-3 h-3 w-1/3 bg-[#E5DDD8]" />
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
 
-        {/* ====================================================
-            PRODUCTS
+        {/* =====================================================
+            PRODUCT GRID
         ===================================================== */}
 
-        <div className="mt-7">
-          {loading && (
-            <div
+        {!loading && sortedProducts.length > 0 && (
+          <div
+            className="
+              grid grid-cols-2 justify-items-stretch
+              gap-x-3 gap-y-7
+              sm:gap-x-5 sm:gap-y-9
+              lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10
+            "
+          >
+            {sortedProducts.map((product) => (
+              <ProductCard
+                key={product._id || product.id || product.productCode}
+                product={product}
+                badgeType="best"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* =====================================================
+            EMPTY STATE
+        ===================================================== */}
+
+        {!loading && sortedProducts.length === 0 && (
+          <div
+            className="
+              border-y border-[#E5DDD8]
+              px-4 py-9 text-center
+              sm:px-6 sm:py-11
+            "
+          >
+            <h2
               className="
-                grid
-                grid-cols-2
-                gap-3
-
-                md:grid-cols-3
-
-                lg:grid-cols-4
-                lg:gap-5
+                font-['Cormorant_Garamond',serif]
+                text-[25px] leading-tight text-[#351411]
+                sm:text-[29px]
               "
             >
-              {Array.from({
-                length: 4,
-              }).map((_, index) => (
-                <div
-                  key={index}
-                  className="animate-pulse"
-                >
-                  <div
-                    className="
-                      aspect-[4/5]
-                      w-full
-                      bg-[#EDE5D8]
-                    "
-                  />
+              Our best sellers are coming soon.
+            </h2>
 
-                  <div
-                    className="
-                      border-x
-                      border-b
-                      border-[#DED4C4]
-                      bg-[#FFFDF9]
-                      p-3
-                    "
-                  >
-                    <div className="h-2 w-16 bg-[#E5DCCF]" />
+            <p
+              className="
+                mx-auto mt-2 max-w-[400px]
+                font-['Poppins',sans-serif]
+                text-[10px] leading-5 text-[#6B5651]
+                sm:text-[11px]
+              "
+            >
+              Discover the Sirraha pieces our customers love.
+              Our featured styles will appear here once available.
+            </p>
 
-                    <div className="mt-2 h-4 w-24 bg-[#E5DCCF]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            <Link
+              to="/"
+              className="
+                group mt-5 inline-flex items-center gap-2
+                border-b border-[#C8A15A] pb-1.5
+                font-['Poppins',sans-serif]
+                text-[9px] font-medium uppercase
+                tracking-[1.8px] text-[#4B1F1B]
+                transition-colors hover:text-[#69352D]
+              "
+            >
+              Back To Home
 
-          {!loading &&
-            filteredProducts.length > 0 && (
-              <div
+              <ArrowRight
+                size={14}
+                strokeWidth={1.4}
+                aria-hidden="true"
                 className="
-                  grid
-                  grid-cols-2
-                  gap-3
-
-                  md:grid-cols-3
-
-                  lg:grid-cols-4
-                  lg:gap-5
+                  text-[#A98243]
+                  transition-transform
+                  group-hover:translate-x-1
                 "
-              >
-                {filteredProducts.map(
-                  (product) => (
-                    <ProductCard
-                      key={
-                        product._id ||
-                        product.id
-                      }
-                      product={product}
-                      badgeType="best"
-                    />
-                  )
-                )}
-              </div>
-            )}
+              />
+            </Link>
+          </div>
+        )}
 
-          {!loading &&
-            filteredProducts.length ===
-              0 && (
-              <div
-                className="
-                  border-y
-                  border-[#DED4C4]
-                  bg-[#FFFDF9]
-                  px-5
-                  py-14
-                  text-center
-                "
-              >
-                <p
-                  className="
-                    font-['Cormorant_Garamond']
-                    text-[25px]
-                    text-[#43231C]
-                  "
-                >
-                  Our best sellers are
-                  coming soon.
-                </p>
-              </div>
-            )}
-        </div>
-
-        {/* ====================================================
+        {/* =====================================================
             VIEW ALL
         ===================================================== */}
 
-        {!loading &&
-          products.length > 0 && (
-            <div
+        {!loading && products.length > 0 && (
+          <div className="mt-7 flex justify-center sm:mt-9">
+            <Link
+              to="/collection?type=best-sellers"
               className="
-                mt-8
-                flex
-                justify-center
+                group inline-flex items-center gap-2
+                border-b border-[#C8A15A] pb-2
+                font-['Poppins',sans-serif]
+                text-[9px] font-medium uppercase
+                tracking-[1.8px] text-[#4B1F1B]
+                transition-colors duration-200
+                hover:border-[#4B1F1B]
+                hover:text-[#69352D]
+                sm:gap-2.5 sm:text-[10px]
               "
             >
-              <Link
-                to="/collection?type=best-sellers"
+              <span>View All Best Sellers</span>
+
+              <ArrowRight
+                size={14}
+                strokeWidth={1.4}
+                aria-hidden="true"
                 className="
-                  group
-                  inline-flex
-                  items-center
-                  gap-2
-
-                  border-b
-                  border-[#C8A15A]
-
-                  pb-1.5
-
-                  font-['Poppins']
-                  text-[8px]
-                  uppercase
-                  tracking-[2.2px]
-
-                  text-[#5A3026]
-
-                  transition-all
-
-                  hover:border-[#5A3026]
+                  text-[#A98243]
+                  transition-transform duration-200
+                  group-hover:translate-x-1
                 "
-              >
-                View All Best Sellers
-
-                <ArrowRight
-                  size={13}
-                  strokeWidth={1.3}
-                  className="
-                    text-[#A98243]
-                    transition-transform
-                    group-hover:translate-x-1
-                  "
-                />
-              </Link>
-            </div>
-          )}
+              />
+            </Link>
+          </div>
+        )}
       </div>
-    </section>
+    </main>
   );
 }
 
-export default BestSellers;
+export default BestSellersPage;
